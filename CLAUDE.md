@@ -125,3 +125,11 @@ Each package's `vite.config.ts` is invoked via `BUILD_TARGET` env var:
 ## Code style
 
 ESLint at the workspace root (`eslint.config.js`) enforces: semicolons, single quotes, 2-space indentation. TypeScript strict mode is on. `@typescript-eslint/no-explicit-any` is relaxed.
+
+## README convention
+
+The repo-root `README.md` is the canonical README for `@pro-fa/expreszo` — it's what GitHub shows on the repo home and what the npm registry shows on the package page. Edit it there.
+
+`packages/expreszo/README.md` is a stub that points back at the root README. The publish workflow (`publish.yml`) copies the root README into `packages/expreszo/` right before `npm publish`, so the npm tarball always carries the full content. **Do not edit the stub** — make changes at the root.
+
+The other two packages (`@pro-fa/expreszo-datetime`, `@pro-fa/expreszo-mcp-server`) have their own self-contained READMEs in their package directories.

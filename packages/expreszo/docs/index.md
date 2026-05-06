@@ -77,13 +77,14 @@ See the [Parser](parser.md#using-plugins) docs for `parser.use(plugin)` semantic
 
 - [Quick Reference](quick-reference.md) - Cheat sheet of operators, functions, and syntax
 - [Expression Syntax](syntax.md) - Complete syntax reference with examples
+- [Date / Time functions](datetime.md) - ~70 date/time functions (provided by an optional package)
 
 ### For Developers
 
 - [Parser](parser.md) - Parser configuration, methods, and customization
 - [Expression](expression.md) - Expression object methods: evaluate, simplify, variables
 - [Advanced Features](advanced-features.md) - Promises, custom resolution, type conversion, operator customization
-- [Date / Time](datetime.md) - Optional Luxon-backed date/time functions (separate package)
+- [Date / Time integration](datetime-integration.md) - How to wire the optional Luxon-backed datetime package into a parser
 - [Language Service](language-service.md) - IDE integration: completions, hover info, diagnostics, Monaco Editor
 - [MCP Server](mcp-server.md) - Expose the language service to AI assistants (Claude Desktop, Claude Code, Cursor) — separate package
 - [Migration Guide](migration.md) - Migrating from expr-eval, legacy mode, version history

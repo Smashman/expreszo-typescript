@@ -60,11 +60,12 @@ nav:
   - For Expression Writers:
     - Quick Reference: quick-reference.md
     - Expression Syntax: syntax.md
+    - Date / Time functions: datetime.md
   - For Developers:
     - Parser: parser.md
     - Expression: expression.md
     - Advanced Features: advanced-features.md
-    - Date / Time: datetime.md
+    - Date / Time integration: datetime-integration.md
     - Language Service: language-service.md
     - MCP Server: mcp-server.md
     - Migration Guide: migration.md

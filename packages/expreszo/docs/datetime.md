@@ -1,52 +1,26 @@
-# Date / Time
+# Date / Time functions
 
-> **Audience:** Developers who want to do date arithmetic, formatting, parsing, or comparisons inside an ExpresZo expression.
+> **Audience:** People writing ExpresZo expressions and want to do date arithmetic, formatting, parsing, or comparisons.
 
-The core `@pro-fa/expreszo` ships with no date/time functions — dates are not part of the value type system. Date support lives in an **optional companion package**, [`@pro-fa/expreszo-datetime`](https://www.npmjs.com/package/@pro-fa/expreszo-datetime), which adds ~70 functions backed by [Luxon](https://moment.github.io/luxon/). Install only when your expressions need it; the core stays Luxon-free.
+These ~70 functions cover everything from "what day of the week is this?" to "how many business days until Christmas?". They are exposed by an **optional package** — if `now()`, `format()`, `daysUntil()` and friends don't work in your environment, ask whoever set up your parser to install [`@pro-fa/expreszo-datetime`](https://www.npmjs.com/package/@pro-fa/expreszo-datetime). Integration details for developers live on the [Date / Time integration](datetime-integration.md) page.
 
-## Install
+## What kind of value is a "date"?
 
-```bash
-npm install @pro-fa/expreszo @pro-fa/expreszo-datetime
+Anywhere these functions ask for a date, you can pass any of:
+
+- A function-produced date (the result of `now()`, `today()`, `parseISO('…')`, `addDuration(…)`, etc.)
+- An **ISO 8601 string** like `'2026-01-15'` or `'2026-01-15T13:45:30Z'`
+- A variable that someone passed into the parser as a JS `Date` or a Luxon `DateTime`
+- A **Unix millisecond** number from another system
+
+Functions that **produce** a date give you back something you can pass straight into the next function — chains just work:
+
 ```
-
-`@pro-fa/expreszo` is a peer dependency of `@pro-fa/expreszo-datetime`. `luxon` is a regular dependency and is pulled in transitively.
-
-## Quick start
-
-```ts
-import { defineParser, fullParser } from '@pro-fa/expreszo';
-import { dateTimePlugin }            from '@pro-fa/expreszo-datetime';
-
-const parser = defineParser({ ...fullParser })
-  .use(dateTimePlugin);
-
-parser.parse("format(addDuration('2026-01-01', 7, 'days'), 'yyyy-MM-dd')").evaluate();
+format(addDuration('2026-01-01', 7, 'days'), 'yyyy-MM-dd')
 // => '2026-01-08'
 ```
 
-`parser.use(plugin)` is the friendly registration entry point — see the [Parser](parser.md#using-plugins) docs for full semantics.
-
-## Polymorphic inputs
-
-Every datetime function accepts any of these shapes for date arguments:
-
-| Shape | Example |
-| --- | --- |
-| Luxon `DateTime` | `DateTime.fromISO('2026-01-01')` |
-| JavaScript `Date` | `new Date('2026-01-01')` |
-| ISO 8601 string | `'2026-01-01T00:00:00Z'` |
-| Unix millisecond number | `1767225600000` |
-
-A single `toDateTime()` helper normalises at the boundary, so you can mix and match within a chain:
-
-```ts
-parser.parse("format(addDuration(d, 7, 'days'), 'yyyy-MM-dd')")
-  .evaluate({ d: new Date('2026-01-01') });
-// => '2026-01-08'
-```
-
-Functions that **produce** a date return a Luxon `DateTime` so chains stay efficient — no repeated parse/format. Functions that produce text (`format`, `toISO`) return strings; functions that return numeric or boolean facts return those shapes directly.
+Functions that produce a string (`format`, `toISO`, `toRelative`) or a number (`year`, `diff`, `toMillis`) return that shape directly.
 
 ## Function reference
 
@@ -79,8 +53,6 @@ fromUnix(1767225600)
 
 ### Inspection — calendar parts
 
-All inspectors accept any input shape and return a number or boolean.
-
 | Function | Returns | Description |
 |---|---|---|
 | `year(d)` | `number` | Calendar year. |
@@ -105,7 +77,7 @@ All inspectors accept any input shape and return a number or boolean.
 | `isDST(d)` | `boolean` | True if `d` is in daylight saving in its zone. |
 | `isWeekend(d)` | `boolean` | `true` for Saturday or Sunday. |
 | `isWeekday(d)` | `boolean` | Opposite of `isWeekend`. |
-| `isValid(d)` | `boolean` | `true` if the value is recognisable as a valid date in any accepted shape. |
+| `isValid(d)` | `boolean` | `true` if the value is recognisable as a valid date. |
 
 ```
 year('2026-01-15')          // 2026
@@ -117,7 +89,7 @@ isValid('not a date')       // false
 
 ### Inspection — relative-to-now predicates
 
-These compare a date to `DateTime.now()` in the local zone. Convert to UTC first if you need UTC truth.
+These compare a date to right now, in the local zone.
 
 | Function | Returns | Description |
 |---|---|---|
@@ -133,7 +105,7 @@ These compare a date to `DateTime.now()` in the local zone. Convert to UTC first
 
 ### Arithmetic
 
-The `unit` argument accepts the same vocabulary Luxon uses, in singular or plural form:
+The `unit` argument accepts singular or plural form:
 `'year'(s)`, `'quarter'(s)`, `'month'(s)`, `'week'(s)`, `'day'(s)`, `'hour'(s)`, `'minute'(s)`, `'second'(s)`, `'millisecond'(s)`.
 
 | Function | Returns | Description |
@@ -144,15 +116,14 @@ The `unit` argument accepts the same vocabulary Luxon uses, in singular or plura
 | `endOf(d, unit)` | `DateTime` | The last instant inside `unit`. |
 | `diff(a, b, unit)` | `number` | `a - b`, expressed as the number of `unit`s. May be negative or fractional. |
 | `clampDate(d, low, high)` | `DateTime` | Clamp `d` into `[low, high]`. |
-| `minDate(d1, d2, …)` | `DateTime` | Earliest of N dates (variadic). Throws on no arguments. |
-| `maxDate(d1, d2, …)` | `DateTime` | Latest of N dates (variadic). Throws on no arguments. |
+| `minDate(d1, d2, …)` | `DateTime` | Earliest of N dates. |
+| `maxDate(d1, d2, …)` | `DateTime` | Latest of N dates. |
 
 ```
-addDuration('2026-01-01', 7, 'days')     // DateTime for 2026-01-08
-subtractDuration(now(), 1, 'month')      // DateTime one month ago
-startOf('2026-04-15T13:45:30Z', 'month') // DateTime for the first of April
-diff('2026-01-08', '2026-01-01', 'days') // 7
-diff('2026-01-08', '2026-01-01', 'hours') // 168
+addDuration('2026-01-01', 7, 'days')      // DateTime for 2026-01-08
+subtractDuration(now(), 1, 'month')       // DateTime one month ago
+startOf('2026-04-15T13:45:30Z', 'month')  // DateTime for the first of April
+diff('2026-01-08', '2026-01-01', 'days')  // 7
 ```
 
 ### Comparison
@@ -163,14 +134,13 @@ diff('2026-01-08', '2026-01-01', 'hours') // 168
 | `isAfter(a, b)` | `boolean` | `a > b`. |
 | `isSame(a, b, unit?)` | `boolean` | Strict equality on the millisecond, or — when `unit` is supplied — equality after truncating both to that unit. |
 | `isBetween(d, start, end, inclusive?)` | `boolean` | Whether `d` falls in `[start, end]`. `inclusive` defaults to `true`. |
-| `compareDates(a, b)` | `number` | `-1` / `0` / `1`. Usable as an `Array.sort` comparator. |
+| `compareDates(a, b)` | `number` | `-1` / `0` / `1`. |
 | `overlapsRange(s1, e1, s2, e2)` | `boolean` | Whether two intervals overlap. |
 | `containsDate(start, end, d)` | `boolean` | Whether `d` falls inside `[start, end]`. |
 
 ```
 isBefore('2026-01-01', '2026-01-02')             // true
 isSame('2026-01-01', '2026-01-31', 'month')      // true
-isSame('2026-01-01', '2026-02-01', 'month')      // false
 isBetween('2026-01-15', '2026-01-01', '2026-01-31') // true
 overlapsRange('2026-01-01', '2026-01-10',
               '2026-01-05', '2026-01-15')        // true
@@ -184,18 +154,18 @@ Range helpers use a half-open `[start, end)` interval — the count is 0 when `s
 |---|---|---|
 | `dateRange(start, end, unit, step?)` | `DateTime[]` | Array of dates from `start` to `end` stepping by `step` `unit`s (default 1). |
 | `businessDaysBetween(start, end)` | `number` | Count of weekdays (Mon–Fri) in `[start, end)`. |
-| `weekdaysBetween(start, end, weekdayNum)` | `number` | Count of a given weekday number (1=Mon … 7=Sun) in `[start, end)`. |
+| `weekdaysBetween(start, end, weekdayNum)` | `number` | Count of a given weekday (1=Mon … 7=Sun) in `[start, end)`. |
 
 ```
-dateRange('2026-01-01', '2026-01-04', 'days')         // 3 dates: 1, 2, 3 Jan
-dateRange('2026-01-01', '2026-01-10', 'days', 3)      // 1, 4, 7 Jan
-businessDaysBetween('2026-01-05', '2026-01-12')       // 5 (Mon–Fri of that week)
-weekdaysBetween('2026-01-05', '2026-02-02', 1)        // 4 Mondays
+dateRange('2026-01-01', '2026-01-04', 'days')      // 3 dates: 1, 2, 3 Jan
+dateRange('2026-01-01', '2026-01-10', 'days', 3)   // 1, 4, 7 Jan
+businessDaysBetween('2026-01-05', '2026-01-12')    // 5 (Mon–Fri of that week)
+weekdaysBetween('2026-01-05', '2026-02-02', 1)     // 4 Mondays
 ```
 
 ### Distance from now
 
-These six helpers all return whole-unit integers, **truncated toward zero**. Negative for the past, positive for the future.
+These return whole-unit integers, **truncated toward zero**. Negative for the past, positive for the future.
 
 | Function | Returns | Description |
 |---|---|---|
@@ -221,11 +191,11 @@ These six helpers all return whole-unit integers, **truncated toward zero**. Neg
 | `toLocal(d)` | `DateTime` | Sugar for `setZone(d, 'local')`. |
 
 ```
-format('2026-01-08T00:00:00Z', 'yyyy-MM-dd')           // '2026-01-08'
-format(now(), 'EEE, MMM d, yyyy')                      // e.g. 'Wed, May 6, 2026'
-toISO(addDuration('2026-01-01', 7, 'days'))            // '2026-01-08T00:00:00.000Z'
-toMillis('2026-01-01T00:00:00Z')                       // 1767225600000
-setZone('2026-01-01T00:00:00Z', 'America/New_York')    // DateTime in NY zone
+format('2026-01-08T00:00:00Z', 'yyyy-MM-dd')         // '2026-01-08'
+format(now(), 'EEE, MMM d, yyyy')                    // e.g. 'Wed, May 6, 2026'
+toRelative('2026-01-01')                             // e.g. '4 months ago'
+toMillis('2026-01-01T00:00:00Z')                     // 1767225600000
+setZone('2026-01-01T00:00:00Z', 'America/New_York')  // DateTime in NY zone
 ```
 
 ## Recipes
@@ -291,23 +261,6 @@ containsDate(promotionStart, promotionEnd, orderDate)
 minDate(estimatedShip, requestedShip, contractedShip)
 ```
 
-## Spread-into-`defineParser` form
+---
 
-`parser.use(plugin)` is the recommended path, but the package also exports a `ParserPreset` for callers who prefer the spread-composition style:
-
-```ts
-import { defineParser, fullParser } from '@pro-fa/expreszo';
-import { withDateTime }              from '@pro-fa/expreszo-datetime';
-
-const parser = defineParser({
-  operators: [...fullParser.operators],
-  functions: [...fullParser.functions, ...withDateTime.functions]
-});
-```
-
-Both forms produce the same parser; pick whichever fits the rest of your codebase.
-
-## Source
-
-- Package: [`@pro-fa/expreszo-datetime`](https://www.npmjs.com/package/@pro-fa/expreszo-datetime)
-- Source: [`packages/expreszo-datetime/src/`](https://github.com/Pro-Fa/expreszo-typescript/tree/main/packages/expreszo-datetime/src)
+Need to wire these into your own parser? See [Date / Time integration](datetime-integration.md).

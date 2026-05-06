@@ -46,6 +46,13 @@ jobs:
     - name: Test (all workspaces)
       run: yarn workspaces run test
 
+    - name: Sync canonical README into expreszo package
+      # The repo-root README is the source of truth for @pro-fa/expreszo;
+      # the package directory ships a stub during dev, replaced here so the
+      # published npm tarball gets the full content.
+      if: matrix.package == 'expreszo'
+      run: cp README.md packages/expreszo/README.md
+
     - name: Show package identity
       working-directory: packages/${{ matrix.package }}
       run: |
