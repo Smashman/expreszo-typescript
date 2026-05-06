@@ -21,6 +21,24 @@ parser.evaluate('price * (1 - discount)', { price: 100, discount: 0.2 }); // 80
 
 [Read full documentation](https://pro-fa.github.io/expreszo-typescript/docs/)
 
+## Companion packages
+
+This package is the core. Two optional companions extend it without bloating the core install — pick them up only when you need them:
+
+- **[`@pro-fa/expreszo-datetime`](https://www.npmjs.com/package/@pro-fa/expreszo-datetime)** — ~30 [Luxon](https://moment.github.io/luxon/)-backed date/time functions (`now`, `parseISO`, `addDuration`, `format`, `isWeekend`, …). Polymorphic inputs accept Luxon `DateTime`, JS `Date`, ISO strings, and millisecond timestamps. The core never imports Luxon.
+- **[`@pro-fa/expreszo-mcp-server`](https://www.npmjs.com/package/@pro-fa/expreszo-mcp-server)** — MCP server that exposes the language service to AI assistants (Claude Desktop, Claude Code, Cursor, …). Ships an `expreszo-mcp` CLI.
+
+Companions register with the new `parser.use(plugin)` API:
+
+```ts
+import { defineParser, fullParser } from '@pro-fa/expreszo';
+import { dateTimePlugin }            from '@pro-fa/expreszo-datetime';
+
+const parser = defineParser({ ...fullParser }).use(dateTimePlugin);
+
+parser.parse("format(addDuration(now(), 7, 'days'), 'yyyy-MM-dd')").evaluate();
+```
+
 ## Why ExpresZo?
 
 ### Fast

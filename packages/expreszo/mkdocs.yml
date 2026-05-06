@@ -64,6 +64,7 @@ nav:
     - Parser: parser.md
     - Expression: expression.md
     - Advanced Features: advanced-features.md
+    - Date / Time: datetime.md
     - Language Service: language-service.md
     - MCP Server: mcp-server.md
     - Migration Guide: migration.md

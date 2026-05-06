@@ -2,11 +2,13 @@
 
 > **Audience:** Developers who want to give an AI assistant (Claude Desktop, Claude Code, Cursor, or any other MCP-capable client) the ability to inspect, complete, and diagnose ExpresZo expressions.
 
-ExpresZo ships an [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server that wraps the [language service](language-service.md) and exposes it over stdio. Once it is wired into your MCP client, the model can ask the server for completions, hover information, syntax highlighting, and diagnostics for any ExpresZo expression — making it dramatically easier for an assistant to author or debug expressions without guessing at the supported functions and syntax.
+The [MCP (Model Context Protocol)](https://modelcontextprotocol.io/) server wraps the [language service](language-service.md) and exposes it over stdio. Once it is wired into your MCP client, the model can ask the server for completions, hover information, syntax highlighting, and diagnostics for any ExpresZo expression — making it dramatically easier for an assistant to author or debug expressions without guessing at the supported functions and syntax.
+
+The server lives in its own package — `@pro-fa/expreszo-mcp-server` — so the core `@pro-fa/expreszo` install does not pull in the MCP SDK or `zod`.
 
 ## What it does
 
-The MCP server registers four tools, each a thin wrapper around the matching language-service API:
+The MCP server registers tools that wrap the matching language-service APIs. The headline ones:
 
 | Tool | Purpose |
 | --- | --- |
@@ -14,22 +16,18 @@ The MCP server registers four tools, each a thin wrapper around the matching lan
 | `expreszo_get_hover` | Hover info — signature, documentation, and variable value preview at a position |
 | `expreszo_get_highlighting` | Token-by-token syntax highlighting for an expression |
 | `expreszo_get_diagnostics` | Parse errors and function-arity errors, returned as LSP `Diagnostic` objects |
+| `expreszo_get_inlay_hints` | Inline parameter hints for function calls |
+| `expreszo_prepare_rename`, `expreszo_rename` | Variable rename support |
 
 All tools return the raw language-service payload as JSON, so the model sees the same data an IDE would consume.
 
 ## Installation
 
-The server ships with `@pro-fa/expreszo` but its runtime dependencies (`@modelcontextprotocol/sdk` and `zod`) are declared as `optionalDependencies`, so they are only installed when npm is allowed to pull optionals (the default).
-
 ```bash
-npm install @pro-fa/expreszo
+npm install @pro-fa/expreszo-mcp-server
 ```
 
-If your environment disables optional dependencies (`npm install --no-optional` or equivalent), install them explicitly:
-
-```bash
-npm install @modelcontextprotocol/sdk zod
-```
+`@pro-fa/expreszo` is a peer dependency and is required at runtime.
 
 After install, the `expreszo-mcp` executable is available via `npx expreszo-mcp` or as a direct `bin` entry in `node_modules/.bin/`.
 
@@ -46,20 +44,20 @@ Edit `claude_desktop_config.json` (Settings → Developer → Edit Config) and a
   "mcpServers": {
     "expreszo": {
       "command": "npx",
-      "args": ["-y", "@pro-fa/expreszo", "expreszo-mcp"]
+      "args": ["-y", "@pro-fa/expreszo-mcp-server", "expreszo-mcp"]
     }
   }
 }
 ```
 
-Restart Claude Desktop. The four `expreszo_*` tools will appear in the tool picker.
+Restart Claude Desktop. The `expreszo_*` tools will appear in the tool picker.
 
 ### Claude Code
 
 Register the server with the `claude mcp` CLI:
 
 ```bash
-claude mcp add expreszo -- npx -y @pro-fa/expreszo expreszo-mcp
+claude mcp add expreszo -- npx -y @pro-fa/expreszo-mcp-server expreszo-mcp
 ```
 
 Or add it manually to your MCP settings file:
@@ -69,7 +67,7 @@ Or add it manually to your MCP settings file:
   "mcpServers": {
     "expreszo": {
       "command": "npx",
-      "args": ["-y", "@pro-fa/expreszo", "expreszo-mcp"]
+      "args": ["-y", "@pro-fa/expreszo-mcp-server", "expreszo-mcp"]
     }
   }
 }
@@ -89,7 +87,7 @@ Create `.vscode/mcp.json` at the root of your workspace:
     "expreszo": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@pro-fa/expreszo", "expreszo-mcp"]
+      "args": ["-y", "@pro-fa/expreszo-mcp-server", "expreszo-mcp"]
     }
   }
 }
@@ -102,17 +100,17 @@ VS Code will prompt you to trust the server the first time it starts. Anyone els
 Open the command palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) and run **MCP: Add Server**. Pick **Command (stdio)**, enter:
 
 - **Command**: `npx`
-- **Args**: `-y @pro-fa/expreszo expreszo-mcp`
+- **Args**: `-y @pro-fa/expreszo-mcp-server expreszo-mcp`
 - **Name**: `expreszo`
 - **Scope**: **User** (stores the entry in your user `settings.json`)
 
-Once installed, open Copilot Chat, switch to **Agent** mode, and click the tools icon — the four `expreszo_*` tools appear under the `expreszo` server and can be toggled on/off per chat.
+Once installed, open Copilot Chat, switch to **Agent** mode, and click the tools icon — the `expreszo_*` tools appear under the `expreszo` server and can be toggled on/off per chat.
 
 Use **MCP: List Servers** from the command palette to start, stop, restart, or view the output log of a running server.
 
 ### Cursor, Zed, and other MCP clients
 
-Any MCP client that can spawn a stdio server will work. Use the same command (`npx -y @pro-fa/expreszo expreszo-mcp`) in whatever configuration format the client expects.
+Any MCP client that can spawn a stdio server will work. Use the same command (`npx -y @pro-fa/expreszo-mcp-server expreszo-mcp`) in whatever configuration format the client expects.
 
 ### Running from a local checkout
 
@@ -123,13 +121,13 @@ If you cloned the repo and want to run the built server directly:
   "mcpServers": {
     "expreszo": {
       "command": "node",
-      "args": ["/absolute/path/to/expreszo-typescript/dist/bin/mcp-server.mjs"]
+      "args": ["/absolute/path/to/expreszo-typescript/packages/expreszo-mcp-server/dist/bin.mjs"]
     }
   }
 }
 ```
 
-Run `npm run build` once in the checkout to generate `dist/bin/mcp-server.mjs`.
+Run `yarn workspaces run build` once in the checkout to generate `packages/expreszo-mcp-server/dist/bin.mjs`.
 
 ## Using it from a chat
 
@@ -216,11 +214,11 @@ produces a diagnostic explaining that `pow` requires two arguments.
 
 ## Programmatic use
 
-If you want to embed the MCP server inside a larger Node application (for example, a custom transport or a test harness), import `createMcpServer` from the `mcp-server` subpath export:
+If you want to embed the MCP server inside a larger Node application (for example, a custom transport or a test harness), import `createMcpServer` from the package:
 
 ```ts
-import { createMcpServer } from '@pro-fa/expreszo/mcp-server';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { createMcpServer }       from '@pro-fa/expreszo-mcp-server';
+import { StdioServerTransport }  from '@modelcontextprotocol/sdk/server/stdio.js';
 
 const server = createMcpServer({
   // Optional: limit which operators the language service exposes
@@ -234,15 +232,15 @@ await server.connect(new StdioServerTransport());
 
 ## Local development and debugging
 
-From a clone of the repo:
+From a clone of the repo, `cd` into `packages/expreszo-mcp-server` and use:
 
 ```bash
 # Run the server against the source (no build needed)
-npm run mcp:dev
+yarn mcp:dev
 
-# Open the official MCP Inspector — lists all 4 tools and lets you
+# Open the official MCP Inspector — lists all tools and lets you
 # invoke them interactively with JSON input
-npm run mcp:inspect
+npx @modelcontextprotocol/inspector tsx src/bin.ts
 ```
 
 To smoke-test manually against the built artifact, pipe JSON-RPC directly into the binary:
@@ -252,7 +250,7 @@ printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke","version":"0.0.0"}}}' \
   '{"jsonrpc":"2.0","method":"notifications/initialized","params":{}}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}' \
-  | node dist/bin/mcp-server.mjs
+  | node packages/expreszo-mcp-server/dist/bin.mjs
 ```
 
-You should see the server respond with its `serverInfo` followed by the list of four `expreszo_*` tools.
+You should see the server respond with its `serverInfo` followed by the list of `expreszo_*` tools.

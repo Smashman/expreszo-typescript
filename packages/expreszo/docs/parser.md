@@ -247,6 +247,76 @@ The `resolve` callback should return:
 
 For cases where different evaluations of the same parsed expression need different resolution logic, prefer passing a resolver directly to `Expression.evaluate(values, resolver)` or `parser.evaluate(expr, values, resolver)` instead of mutating `parser.resolve`. See [Per-Expression Variable Resolver](advanced-features.md#per-expression-variable-resolver).
 
+## Using plugins
+
+`parser.use(plugin)` is the friendly way to register a bundle of operators, functions, and constants on an existing parser. Companion packages export their entries as a single `Plugin` object, so wiring one up takes a single call:
+
+```ts
+import { defineParser, fullParser } from '@pro-fa/expreszo';
+import { dateTimePlugin }            from '@pro-fa/expreszo-datetime';
+
+const parser = defineParser({ ...fullParser })
+  .use(dateTimePlugin);
+
+parser.parse("format(addDuration(now(), 7, 'days'), 'yyyy-MM-dd')").evaluate();
+```
+
+`use()` returns the parser, so chained calls work too:
+
+```ts
+parser
+  .use(dateTimePlugin)
+  .use(myCustomPlugin);
+```
+
+### `Plugin` interface
+
+```ts
+interface Plugin {
+  readonly name: string;                                     // shown in collision errors
+  readonly version?: string;                                 // informational
+  readonly operators?: readonly OperatorDescriptor[];
+  readonly functions?: readonly FunctionDescriptor[];
+  readonly constants?: Readonly<Record<string, Value>>;
+}
+```
+
+Authoring a plugin is the same as authoring a preset — assemble `FunctionDescriptor` / `OperatorDescriptor` arrays — plus a `name`. See [`@pro-fa/expreszo-datetime`'s `plugin.ts`](https://github.com/Pro-Fa/expreszo-typescript/blob/main/packages/expreszo-datetime/src/plugin.ts) for a worked example.
+
+### Collision handling
+
+By default, `use()` throws if a plugin tries to register an operator, function, or constant that's already on the parser:
+
+```ts
+parser.use(somePluginWithMax);
+// Error: Plugin 'somePluginWithMax': function 'max' already registered.
+//        Pass { override: true } to replace.
+```
+
+Pass `{ override: true }` to silently replace existing entries:
+
+```ts
+parser.use(somePluginWithMax, { override: true });
+```
+
+The default-throw behaviour is intentional — it surfaces unintentional shadowing of built-ins (often a sign you want a different function name).
+
+### Spread-into-`defineParser` form
+
+If you prefer the spread-composition style, every companion package also exports a `ParserPreset`:
+
+```ts
+import { defineParser, fullParser } from '@pro-fa/expreszo';
+import { withDateTime }              from '@pro-fa/expreszo-datetime';
+
+const parser = defineParser({
+  operators: [...fullParser.operators],
+  functions: [...fullParser.functions, ...withDateTime.functions]
+});
+```
+
+Both produce identical parsers; pick whichever matches the rest of your codebase.
+
 ## Advanced Configuration
 
 ### Type Conversion (as operator)

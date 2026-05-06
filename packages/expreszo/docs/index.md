@@ -29,6 +29,16 @@ Parsed expressions compile to an **immutable AST** that can be evaluated repeate
 
 Build exactly the parser you need with tree-shakeable presets, or use the full kitchen-sink parser with zero configuration.
 
+## The package family
+
+ExpresZo ships as three independent npm packages so you only install what you need:
+
+| Package | When to install |
+|---------|-----------------|
+| [`@pro-fa/expreszo`](https://www.npmjs.com/package/@pro-fa/expreszo) | Always. The core parser, evaluator, presets, and language service. |
+| [`@pro-fa/expreszo-datetime`](https://www.npmjs.com/package/@pro-fa/expreszo-datetime) | Optional. Adds ~30 [Luxon](https://moment.github.io/luxon/)-backed date/time functions (`now`, `parseISO`, `addDuration`, `format`, …). The core never imports Luxon. |
+| [`@pro-fa/expreszo-mcp-server`](https://www.npmjs.com/package/@pro-fa/expreszo-mcp-server) | Optional. Exposes the language service to AI assistants over [MCP](https://modelcontextprotocol.io/). Pulls in `@modelcontextprotocol/sdk` and `zod`. |
+
 ## Installation
 
 ```bash
@@ -45,6 +55,22 @@ const expr = parser.parse('2 * x + 1');
 console.log(expr.evaluate({ x: 3 })); // 7
 ```
 
+### Adding an optional plugin
+
+Companion packages export a `Plugin` that registers in one call:
+
+```typescript
+import { defineParser, fullParser } from '@pro-fa/expreszo';
+import { dateTimePlugin }            from '@pro-fa/expreszo-datetime';
+
+const parser = defineParser({ ...fullParser })
+  .use(dateTimePlugin);
+
+parser.parse("format(addDuration(now(), 7, 'days'), 'yyyy-MM-dd')").evaluate();
+```
+
+See the [Parser](parser.md#using-plugins) docs for `parser.use(plugin)` semantics, and [Date / Time](datetime.md) for the full datetime function reference.
+
 ## Documentation
 
 ### For Expression Writers
@@ -57,8 +83,9 @@ console.log(expr.evaluate({ x: 3 })); // 7
 - [Parser](parser.md) - Parser configuration, methods, and customization
 - [Expression](expression.md) - Expression object methods: evaluate, simplify, variables
 - [Advanced Features](advanced-features.md) - Promises, custom resolution, type conversion, operator customization
+- [Date / Time](datetime.md) - Optional Luxon-backed date/time functions (separate package)
 - [Language Service](language-service.md) - IDE integration: completions, hover info, diagnostics, Monaco Editor
-- [MCP Server](mcp-server.md) - Expose the language service to AI assistants (Claude Desktop, Claude Code, Cursor)
+- [MCP Server](mcp-server.md) - Expose the language service to AI assistants (Claude Desktop, Claude Code, Cursor) — separate package
 - [Migration Guide](migration.md) - Migrating from expr-eval, legacy mode, version history
 
 ### For Contributors
