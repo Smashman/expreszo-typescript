@@ -13,3 +13,4 @@ export {
   fullParser
 } from './presets.js';
 export type { ParserPreset } from './presets.js';
+export type { Plugin, UsePluginOptions } from './plugin.js';

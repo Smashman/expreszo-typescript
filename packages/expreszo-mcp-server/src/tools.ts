@@ -1,8 +1,8 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import type { LanguageServiceApi } from '../language-service/language-service.types.js';
-import type { Values } from '../types/values.js';
+import type { LanguageServiceApi } from '@pro-fa/expreszo/language-service';
+import type { Values } from '@pro-fa/expreszo';
 import type { Diagnostic } from 'vscode-languageserver-types';
 import { resolvePosition, type PositionInput } from './position.js';
 

@@ -101,26 +101,18 @@ export default defineConfig(() => {
               'type-check': resolve(__dirname, 'src/entries/type-check.ts'),
               utility: resolve(__dirname, 'src/entries/utility.ts'),
               validation: resolve(__dirname, 'src/entries/validation.ts'),
-              'language-service': resolve(__dirname, 'src/entries/language-service.ts'),
-              'mcp-server': resolve(__dirname, 'src/entries/mcp-server.ts'),
-              'bin/mcp-server': resolve(__dirname, 'src/mcp-server/bin.ts')
+              'language-service': resolve(__dirname, 'src/entries/language-service.ts')
             },
             name: 'exprEval',
             formats: ['es' as const]
           },
           rollupOptions: {
-            external: [
-              'zod',
-              /^@modelcontextprotocol\/sdk(\/.*)?$/
-            ],
             output: {
               exports: 'named' as const,
               preserveModules: false,
               inlineDynamicImports: false,
               entryFileNames: '[name].mjs',
-              chunkFileNames: 'chunks/[name]-[hash].mjs',
-              banner: (chunk) =>
-                chunk.fileName === 'bin/mcp-server.mjs' ? '#!/usr/bin/env node' : ''
+              chunkFileNames: 'chunks/[name]-[hash].mjs'
             }
           },
           minify: false

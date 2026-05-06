@@ -6,6 +6,7 @@ import type { OperatorFunction } from '../types/parser.js';
 import { ParseError, VariableError } from '../types/errors.js';
 import { setDeprecationHandler } from '../utils/deprecation.js';
 import type { DeprecationHandler } from '../utils/deprecation.js';
+import type { Plugin, UsePluginOptions } from '../api/plugin.js';
 import { atan2, condition, fac, filter, fold, gamma, hypot, indexOf, join, map, max, min, random, roundTo, sum, json, stringLength, isEmpty, stringContains, startsWith, endsWith, searchCount, trim, toUpper, toLower, toTitle, split, repeat, reverse, left, right, replace, replaceFirst, naturalSort, toNumber, toBoolean, padLeft, padRight, padBoth, slice, urlEncode, base64Encode, base64Decode, coalesceString, merge, keys, values, count, clamp, reduce, find, some, every, unique, distinct, sort, flattenArray, mapValues, pick, omit, isArray, isObject, isNumber, isString, isBoolean, isNull, isUndefined, isFunctionValue, mean, median, mostFrequent, variance, stddev, percentile, range, chunk, union, intersect, groupBy, countBy } from '../functions/index.js';
 import {
   add,
@@ -304,6 +305,59 @@ export class Parser {
     // - { value: <something> } use <something> as the value for the variable
     // - any other value is treated as the value to use for the token.
     this.resolve = (): VariableResolveResult => undefined;
+  }
+
+  /**
+   * Registers a plugin's operators, functions, and constants on this parser.
+   * Returns the parser so calls can be chained.
+   *
+   * Throws on a name collision with an already-registered operator, function,
+   * or constant. Pass `{ override: true }` to silently replace.
+   *
+   * @example
+   * ```ts
+   * import { defineParser, fullParser } from '@pro-fa/expreszo';
+   * import { dateTimePlugin }            from '@pro-fa/expreszo-datetime';
+   *
+   * const parser = defineParser({ ...fullParser }).use(dateTimePlugin);
+   * ```
+   */
+  use(plugin: Plugin, options?: UsePluginOptions): this {
+    const override = options?.override ?? false;
+    const tag = plugin.name;
+
+    if (plugin.operators) {
+      for (const op of plugin.operators) {
+        const target =
+          op.kind === 'infix'   ? this.binaryOps  :
+          op.kind === 'ternary' ? this.ternaryOps :
+                                  this.unaryOps;
+        if (!override && Object.prototype.hasOwnProperty.call(target, op.symbol)) {
+          throw new Error(`Plugin '${tag}': operator '${op.symbol}' already registered. Pass { override: true } to replace.`);
+        }
+        target[op.symbol] = op.impl;
+      }
+    }
+
+    if (plugin.functions) {
+      for (const fn of plugin.functions) {
+        if (!override && Object.prototype.hasOwnProperty.call(this.functions, fn.name)) {
+          throw new Error(`Plugin '${tag}': function '${fn.name}' already registered. Pass { override: true } to replace.`);
+        }
+        this.functions[fn.name] = fn.impl;
+      }
+    }
+
+    if (plugin.constants) {
+      for (const [name, value] of Object.entries(plugin.constants)) {
+        if (!override && Object.prototype.hasOwnProperty.call(this.numericConstants, name)) {
+          throw new Error(`Plugin '${tag}': constant '${name}' already registered. Pass { override: true } to replace.`);
+        }
+        this.numericConstants[name] = value;
+      }
+    }
+
+    return this;
   }
 
   /**

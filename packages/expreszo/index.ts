@@ -66,6 +66,12 @@ export type {
 
 export type { ParserConfig } from './src/api/define-parser.js';
 export type { ParserPreset } from './src/api/presets.js';
+export type { Plugin, UsePluginOptions } from './src/api/plugin.js';
+
+// Descriptor types for advanced users authoring plugins or presets
+export type { OperatorDescriptor, OperatorKind, OperatorAssociativity, PrecedenceLevel } from './src/registry/operator-descriptor.js';
+export { Precedence } from './src/registry/operator-descriptor.js';
+export type { FunctionDescriptor, FunctionCategory, FunctionDocs, FunctionParamDoc, ParamType } from './src/registry/function-descriptor.js';
 
 export type { DeprecationHandler } from './src/utils/deprecation.js';
 

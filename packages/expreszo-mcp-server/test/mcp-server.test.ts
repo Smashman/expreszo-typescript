@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createMcpServer } from '../src/mcp-server/server';
+import { createMcpServer } from '../src/server.js';
 
 interface ToolResult {
   isError?: boolean;

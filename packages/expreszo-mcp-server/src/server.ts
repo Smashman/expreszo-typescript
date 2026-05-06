@@ -1,6 +1,6 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { createLanguageService } from '../language-service/language-service.js';
-import type { LanguageServiceOptions } from '../language-service/language-service.types.js';
+import { createLanguageService } from '@pro-fa/expreszo/language-service';
+import type { LanguageServiceOptions } from '@pro-fa/expreszo/language-service';
 import { registerTools } from './tools.js';
 
 const DEFAULT_MCP_SERVER_VERSION = '0.5.0';

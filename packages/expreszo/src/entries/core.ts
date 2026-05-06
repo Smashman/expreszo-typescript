@@ -20,6 +20,7 @@ export { defineParser } from '../api/define-parser.js';
 export type { ParserConfig } from '../api/define-parser.js';
 export { coreParser } from '../api/presets.js';
 export type { ParserPreset } from '../api/presets.js';
+export type { Plugin, UsePluginOptions } from '../api/plugin.js';
 
 // Public types
 export type {

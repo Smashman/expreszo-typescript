@@ -20,7 +20,8 @@ export type FunctionCategory =
   | 'string'
   | 'object'
   | 'utility'
-  | 'type-check';
+  | 'type-check'
+  | 'datetime';
 
 /**
  * Parameter type used by the type-aware diagnostic pass in the language
