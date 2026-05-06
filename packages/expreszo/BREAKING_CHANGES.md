@@ -60,6 +60,10 @@ Optional Luxon-backed date/time functions (`now`, `parseISO`, `addDuration`, `fo
 npm install @pro-fa/expreszo-datetime
 ```
 
+### `engines` raised to Node `>=20`
+
+The `engines.node` field on every package goes from `>=18.0.0` to `>=20.0.0`. Node 18 reached end-of-life in April 2025, and the modern dev toolchain (eslint v9, vite v6, rimraf v5/v6) no longer installs cleanly on it. The runtime code itself still uses only basic ES2022 features, but we're no longer testing on Node 18 — drop a version manager into your project if you're still on it.
+
 ### `FunctionCategory` widened
 
 The exported `FunctionCategory` union now includes `'datetime'`. Code that does an exhaustive `switch` on the union will get a TS narrowing warning for the new case; add a branch (or a `default`) to handle it.
