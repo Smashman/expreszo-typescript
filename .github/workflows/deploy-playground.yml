@@ -27,13 +27,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: 'npm'
+          cache: 'yarn'
 
       - name: Install dependencies
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
-      - name: Build UMD bundle
-        run: npm run build:umd
+      - name: Build UMD bundle (core)
+        working-directory: packages/expreszo
+        run: yarn build:umd
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -44,17 +45,18 @@ jobs:
         run: pip install mkdocs-material==9.7.1
 
       - name: Build documentation
+        working-directory: packages/expreszo
         run: mkdocs build
 
       - name: Prepare playground files
         run: |
           mkdir -p _site/dist
-          cp samples/language-service-sample/index.html _site/
-          cp samples/language-service-sample/app.js _site/
-          cp samples/language-service-sample/examples.js _site/
-          cp samples/language-service-sample/styles.css _site/
-          cp dist/bundle.js _site/dist/
-          cp -r site _site/docs
+          cp packages/expreszo/samples/language-service-sample/index.html _site/
+          cp packages/expreszo/samples/language-service-sample/app.js _site/
+          cp packages/expreszo/samples/language-service-sample/examples.js _site/
+          cp packages/expreszo/samples/language-service-sample/styles.css _site/
+          cp packages/expreszo/dist/bundle.js _site/dist/
+          cp -r packages/expreszo/site _site/docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

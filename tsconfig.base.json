@@ -16,7 +16,6 @@
     "removeComments": false,
     "noEmit": false,
     "importHelpers": false,
-    "downlevelIteration": false,
 
     "isolatedModules": true,
     "allowSyntheticDefaultImports": true,
