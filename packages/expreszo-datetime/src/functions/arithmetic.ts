@@ -50,3 +50,26 @@ export function endOf(d: unknown, u: unknown): DateTime {
 export function diff(d1: unknown, d2: unknown, u: unknown): number {
   return toDateTime(d1).diff(toDateTime(d2), unit(u)).as(unit(u));
 }
+
+export function clampDate(d: unknown, low: unknown, high: unknown): DateTime {
+  const dt   = toDateTime(d);
+  const lo   = toDateTime(low);
+  const hi   = toDateTime(high);
+  if (dt < lo) return lo;
+  if (dt > hi) return hi;
+  return dt;
+}
+
+export function minDate(...args: unknown[]): DateTime {
+  if (args.length === 0) {
+    throw new Error('minDate() requires at least one argument');
+  }
+  return args.map(toDateTime).reduce((a, b) => (a < b ? a : b));
+}
+
+export function maxDate(...args: unknown[]): DateTime {
+  if (args.length === 0) {
+    throw new Error('maxDate() requires at least one argument');
+  }
+  return args.map(toDateTime).reduce((a, b) => (a > b ? a : b));
+}

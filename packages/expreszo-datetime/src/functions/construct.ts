@@ -49,3 +49,39 @@ export function dateTime(
     second: typeof second === 'number' ? second : 0
   });
 }
+
+export function yesterday(): DateTime {
+  return DateTime.now().startOf('day').minus({ days: 1 });
+}
+
+export function tomorrow(): DateTime {
+  return DateTime.now().startOf('day').plus({ days: 1 });
+}
+
+export function date(year: unknown, month: unknown, day: unknown): DateTime {
+  return dateTime(year, month, day);
+}
+
+export function time(
+  hour: unknown,
+  minute: unknown,
+  second?: unknown,
+  millisecond?: unknown
+): DateTime {
+  if (typeof hour !== 'number' || typeof minute !== 'number') {
+    throw new Error('time() expects numeric hour and minute');
+  }
+  return DateTime.now().set({
+    hour,
+    minute,
+    second:      typeof second      === 'number' ? second      : 0,
+    millisecond: typeof millisecond === 'number' ? millisecond : 0
+  });
+}
+
+export function fromUnix(input: unknown): DateTime {
+  if (typeof input !== 'number') {
+    throw new Error('fromUnix() expects a number (Unix seconds)');
+  }
+  return DateTime.fromSeconds(input);
+}

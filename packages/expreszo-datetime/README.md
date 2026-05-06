@@ -40,11 +40,16 @@ parser.parse("format(addDuration('2026-01-01', 7, 'days'), 'yyyy-MM-dd')").evalu
 
 ## Function reference
 
-**Construction**: `now`, `today`, `parseISO`, `parseDate`, `fromMillis`, `dateTime`
-**Inspection**: `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `dayOfWeek`, `dayOfYear`, `weekOfYear`, `daysInMonth`, `isWeekend`, `isValid`
-**Arithmetic**: `addDuration`, `subtractDuration`, `startOf`, `endOf`, `diff`
-**Comparison**: `isBefore`, `isAfter`, `isSame`
-**Format / zone**: `format`, `toISO`, `toMillis`, `setZone`
+~70 functions across the categories below. Full reference with examples in the [Date / Time docs page](https://pro-fa.github.io/expreszo-typescript/datetime/).
+
+- **Construction**: `now`, `today`, `yesterday`, `tomorrow`, `parseISO`, `parseDate`, `fromMillis`, `fromUnix`, `dateTime`, `date`, `time`
+- **Inspection — calendar parts**: `year`, `month`, `day`, `hour`, `minute`, `second`, `millisecond`, `quarter`, `dayOfWeek`, `dayOfYear`, `weekOfYear`, `isoWeekYear`, `daysInMonth`, `daysInYear`, `weeksInYear`, `offsetMinutes`, `offsetHours`, `zoneName`, `isLeapYear`, `isDST`, `isWeekend`, `isWeekday`, `isValid`
+- **Inspection — relative-to-now**: `isToday`, `isYesterday`, `isTomorrow`, `isThisWeek`, `isThisMonth`, `isThisYear`, `isInPast`, `isInFuture`, `age`
+- **Arithmetic**: `addDuration`, `subtractDuration`, `startOf`, `endOf`, `diff`, `clampDate`, `minDate`, `maxDate`
+- **Comparison**: `isBefore`, `isAfter`, `isSame`, `isBetween`, `compareDates`, `overlapsRange`, `containsDate`
+- **Range / sequence**: `dateRange`, `businessDaysBetween`, `weekdaysBetween`
+- **Distance from now**: `daysUntil`, `daysSince`, `hoursUntil`, `hoursSince`, `minutesUntil`, `minutesSince`
+- **Format / zone**: `format`, `toISO`, `toMillis`, `toUnix`, `toRelative`, `toRelativeCalendar`, `setZone`, `toUTC`, `toLocal`
 
 `unit` arguments accept `'year'(s)`, `'quarter'(s)`, `'month'(s)`, `'week'(s)`, `'day'(s)`, `'hour'(s)`, `'minute'(s)`, `'second'(s)`, `'millisecond'(s)` — same vocabulary Luxon uses.
 

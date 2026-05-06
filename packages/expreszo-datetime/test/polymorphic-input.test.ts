@@ -36,4 +36,25 @@ describe('polymorphic inputs produce the same result', () => {
     expect(evaluate(`format(d,  ${pattern})`, { d:  D })).toBe('2026-01-01');
     expect(evaluate(`format(dt, ${pattern})`, { dt: DT })).toBe('2026-01-01');
   });
+
+  it('quarter / isLeapYear / toUnix / toUTC accept every input shape', () => {
+    for (const expr of [`'${ISO}'`, 'ms', 'd', 'dt']) {
+      const vars = { ms: MS, d: D, dt: DT };
+      expect(evaluate(`quarter(${expr})`, vars)).toBe(1);
+      expect(evaluate(`isLeapYear(${expr})`, vars)).toBe(false);
+      expect(evaluate(`toUnix(${expr})`, vars)).toBe(1767225600);
+      expect((evaluate(`toUTC(${expr})`, vars) as DateTime).zoneName).toBe('UTC');
+    }
+  });
+
+  it('compareDates / containsDate / clampDate accept any input combination', () => {
+    expect(evaluate(`compareDates('${ISO}', dt)`, { dt: DT })).toBe(0);
+    expect(evaluate("containsDate('2025-01-01', '2027-01-01', d)", { d: D })).toBe(true);
+
+    const clamped = evaluate(
+      "clampDate(d, '2026-06-01', '2026-12-31')",
+      { d: D }
+    ) as DateTime;
+    expect(clamped.toISODate()).toBe('2026-06-01');
+  });
 });

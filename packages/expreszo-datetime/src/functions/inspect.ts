@@ -25,3 +25,37 @@ export function isValid(d: unknown): boolean {
   if (typeof d === 'string') return DateTime.fromISO(d).isValid;
   return false;
 }
+
+// Extra calendar parts.
+export const quarter       = (d: unknown): number  => toDateTime(d).quarter;
+export const isoWeekYear   = (d: unknown): number  => toDateTime(d).weekYear;
+export const isLeapYear    = (d: unknown): boolean => toDateTime(d).isInLeapYear;
+export const daysInYear    = (d: unknown): number  => toDateTime(d).daysInYear;
+export const weeksInYear   = (d: unknown): number  => toDateTime(d).weeksInWeekYear;
+export const isDST         = (d: unknown): boolean => toDateTime(d).isInDST;
+export const offsetMinutes = (d: unknown): number  => toDateTime(d).offset;
+export const offsetHours   = (d: unknown): number  => toDateTime(d).offset / 60;
+export const zoneName      = (d: unknown): string  => toDateTime(d).zoneName ?? 'local';
+
+// Relative-to-now predicates. All compare against DateTime.now() in the
+// caller's local zone; convert to UTC first if you need UTC truth.
+export const isWeekday = (d: unknown): boolean => !isWeekend(d);
+
+export const isToday     = (d: unknown): boolean => toDateTime(d).hasSame(DateTime.now(), 'day');
+export const isYesterday = (d: unknown): boolean =>
+  toDateTime(d).hasSame(DateTime.now().minus({ days: 1 }), 'day');
+export const isTomorrow  = (d: unknown): boolean =>
+  toDateTime(d).hasSame(DateTime.now().plus({ days: 1 }), 'day');
+
+export const isThisWeek  = (d: unknown): boolean => toDateTime(d).hasSame(DateTime.now(), 'week');
+export const isThisMonth = (d: unknown): boolean => toDateTime(d).hasSame(DateTime.now(), 'month');
+export const isThisYear  = (d: unknown): boolean => toDateTime(d).hasSame(DateTime.now(), 'year');
+
+export const isInPast    = (d: unknown): boolean => toDateTime(d) < DateTime.now();
+export const isInFuture  = (d: unknown): boolean => toDateTime(d) > DateTime.now();
+
+export function age(d: unknown): number {
+  const dt = toDateTime(d);
+  const years = DateTime.now().diff(dt, 'years').years;
+  return years < 0 ? 0 : Math.floor(years);
+}
