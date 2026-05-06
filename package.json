@@ -10,6 +10,7 @@
   "workspaces": [
     "packages/*"
   ],
+  "files": [],
   "scripts": {
     "build": "yarn workspaces run build",
     "test": "yarn workspaces run test",

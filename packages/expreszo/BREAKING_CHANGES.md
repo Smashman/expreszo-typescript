@@ -2,6 +2,68 @@
 
 This document lists breaking changes in the library to help users migrate between versions.
 
+## 0.6.0 — companion packages and `parser.use(plugin)`
+
+### `./mcp-server` subpath export removed
+
+The MCP server moved into its own published package. Update imports and installs:
+
+```bash
+# Before
+npm install @pro-fa/expreszo
+# implicitly used the optional MCP peers
+
+# After
+npm install @pro-fa/expreszo @pro-fa/expreszo-mcp-server
+```
+
+```ts
+// Before
+import { createMcpServer } from '@pro-fa/expreszo/mcp-server';
+
+// After
+import { createMcpServer } from '@pro-fa/expreszo-mcp-server';
+```
+
+The `expreszo-mcp` CLI now ships from `@pro-fa/expreszo-mcp-server`:
+
+```bash
+# Before
+npx -p @pro-fa/expreszo expreszo-mcp
+
+# After
+npx -p @pro-fa/expreszo-mcp-server expreszo-mcp
+```
+
+### `optionalDependencies` for `@modelcontextprotocol/sdk` and `zod` removed
+
+These are now real dependencies of `@pro-fa/expreszo-mcp-server`. Existing projects that didn't install them explicitly weren't using the MCP server anyway; everyone else picks them up transitively when they install the new package.
+
+### New: `parser.use(plugin)` and the `Plugin` interface
+
+A friendlier alternative to spreading presets into `defineParser`. Companion packages can ship a single `Plugin` object that the consumer registers in one call:
+
+```ts
+import { defineParser, fullParser } from '@pro-fa/expreszo';
+import { dateTimePlugin }            from '@pro-fa/expreszo-datetime';
+
+const parser = defineParser({ ...fullParser }).use(dateTimePlugin);
+```
+
+The existing spread-into-`defineParser` style still works — `Plugin` is structurally a superset of `ParserPreset`. `parser.use()` throws on a name collision with an already-registered operator, function, or constant; pass `{ override: true }` to replace.
+
+### New (optional): `@pro-fa/expreszo-datetime`
+
+Optional Luxon-backed date/time functions (`now`, `parseISO`, `addDuration`, `format`, …). Install only when expressions need date math; the core stays Luxon-free.
+
+```bash
+npm install @pro-fa/expreszo-datetime
+```
+
+### `FunctionCategory` widened
+
+The exported `FunctionCategory` union now includes `'datetime'`. Code that does an exhaustive `switch` on the union will get a TS narrowing warning for the new case; add a branch (or a `default`) to handle it.
+
 ## Migration to ExpresZo
 
 ### Renaming

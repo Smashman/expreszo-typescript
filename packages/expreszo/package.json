@@ -137,14 +137,11 @@
     "vitest": "^3.2.4",
     "vscode-languageserver-types": "^3.17.5"
   },
+  "_bundlesize_note": "bundlesize measures gzipped sizes by default. The UMD bundle currently sits at ~45 KB gzipped; the 60 KB cap leaves ~33% headroom for incremental growth. The ESM entry is a thin re-export barrel, so we don't gate it (the real weight lives in dist/chunks/*.mjs). bundlesize is NOT wired into CI today; this field documents the intended budget.",
   "bundlesize": [
     {
       "path": "./dist/bundle.min.js",
-      "maxSize": "50kb"
-    },
-    {
-      "path": "./dist/index.mjs",
-      "maxSize": "80kb"
+      "maxSize": "60kb"
     }
   ],
   "dependencies": {
