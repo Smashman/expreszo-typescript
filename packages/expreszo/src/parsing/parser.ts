@@ -328,10 +328,14 @@ export class Parser {
 
     if (plugin.operators) {
       for (const op of plugin.operators) {
-        const target =
-          op.kind === 'infix'   ? this.binaryOps  :
-          op.kind === 'ternary' ? this.ternaryOps :
-                                  this.unaryOps;
+        let target: Record<string, OperatorFunction>;
+        if (op.kind === 'infix') {
+          target = this.binaryOps;
+        } else if (op.kind === 'ternary') {
+          target = this.ternaryOps;
+        } else {
+          target = this.unaryOps;
+        }
         if (!override && Object.prototype.hasOwnProperty.call(target, op.symbol)) {
           throw new Error(`Plugin '${tag}': operator '${op.symbol}' already registered. Pass { override: true } to replace.`);
         }

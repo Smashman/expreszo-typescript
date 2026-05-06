@@ -108,7 +108,7 @@ describe('format and zone', () => {
 
   it('toMillis returns Unix milliseconds', () => {
     const expected = Date.UTC(2026, 0, 1);
-    expect(parser().evaluate(`toMillis('2026-01-01T00:00:00Z')`)).toBe(expected);
+    expect(parser().evaluate("toMillis('2026-01-01T00:00:00Z')")).toBe(expected);
   });
 });
 

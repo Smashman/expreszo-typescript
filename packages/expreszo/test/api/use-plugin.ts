@@ -2,8 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   defineParser,
   coreParser,
-  fullParser,
-  Parser
+  fullParser
 } from '../../index.js';
 import type { Plugin } from '../../index.js';
 import { Precedence } from '../../index.js';
