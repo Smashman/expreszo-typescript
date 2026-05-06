@@ -10,10 +10,11 @@ export default [
   // Global ignores for generated files
   {
     ignores: [
-      'dist/**',
-      'node_modules/**',
-      'coverage/**',
-      '.nyc_output/**'
+      '**/dist/**',
+      '**/node_modules/**',
+      '**/coverage/**',
+      '**/.nyc_output/**',
+      '**/parser.d.ts'
     ]
   },
 

@@ -11,6 +11,14 @@ jobs:
   publish:
     runs-on: ubuntu-latest
 
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - expreszo
+          - expreszo-datetime
+          - expreszo-mcp-server
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -20,29 +28,32 @@ jobs:
       with:
         node-version: 20
         registry-url: https://registry.npmjs.org/
-        cache: 'npm'
+        cache: 'yarn'
 
     - name: Install dependencies
-      run: npm ci
+      run: yarn install --frozen-lockfile
 
-    - name: Run lint
-      run: npm run lint
+    - name: Lint (all workspaces)
+      run: yarn workspaces run lint
 
-    - name: Run type check
-      run: npm run type-check
+    - name: Build (all workspaces)
+      # Must run before type-check; see comment in ci.yml.
+      run: yarn workspaces run build
 
-    - name: Run tests
-      run: npm test
+    - name: Type-check (all workspaces)
+      run: yarn workspaces run type-check
 
-    - name: Build
-      run: npm run build
+    - name: Test (all workspaces)
+      run: yarn workspaces run test
 
-    - name: Verify package name and version
+    - name: Show package identity
+      working-directory: packages/${{ matrix.package }}
       run: |
         echo "Package: $(node -p "require('./package.json').name")"
         echo "Version: $(node -p "require('./package.json').version")"
 
-    - name: Publish to npm
+    - name: Publish ${{ matrix.package }} to npm
+      working-directory: packages/${{ matrix.package }}
       run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
