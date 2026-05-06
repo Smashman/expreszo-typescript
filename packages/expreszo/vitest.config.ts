@@ -22,7 +22,6 @@ export default defineConfig({
         'src/types/**',
         // barrel files — exclude from coverage
         'src/**/index.ts',
-        'samples/**',
         'eslint.config.js'
       ],
       thresholds: {

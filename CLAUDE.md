@@ -12,12 +12,15 @@ This is a **yarn workspace monorepo** with three published packages:
 │   ├── expreszo/             # @pro-fa/expreszo — core expression evaluator
 │   ├── expreszo-datetime/    # @pro-fa/expreszo-datetime — optional Luxon plugin
 │   └── expreszo-mcp-server/  # @pro-fa/expreszo-mcp-server — MCP server CLI
+├── docs/                     # mkdocs source — published to GitHub Pages by deploy-playground.yml
+├── samples/                  # Monaco-based language-service playground (also deployed to Pages)
+├── mkdocs.yml                # mkdocs site config (reads docs/, writes site/)
 ├── eslint.config.js          # shared eslint config
 ├── tsconfig.base.json        # shared TS compiler options (each package extends this)
 └── package.json              # private workspace root
 ```
 
-The core never depends on Luxon or `@modelcontextprotocol/sdk` — those live only in their respective companion packages.
+`docs/` and `samples/` are intentionally outside `packages/` — they are repo-level concerns, not part of any published npm package. The core never depends on Luxon or `@modelcontextprotocol/sdk` either; those live only in their respective companion packages.
 
 ## Commands
 
@@ -39,6 +42,14 @@ yarn test:watch                     # vitest watch mode
 npx vitest run test/core/evaluate.ts  # one file
 yarn coverage                       # 80% threshold required
 yarn bench                          # parser benchmarks
+```
+
+Docs and the playground are wired up at the workspace root:
+
+```bash
+yarn playground                     # build expreszo UMD + serve the Monaco playground at :8080
+yarn docs:serve                     # mkdocs dev server with live reload
+yarn docs:build                     # produce ./site for the deploy-playground.yml workflow
 ```
 
 ## Core architecture (`@pro-fa/expreszo`)

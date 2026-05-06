@@ -45,18 +45,19 @@ jobs:
         run: pip install mkdocs-material==9.7.1
 
       - name: Build documentation
-        working-directory: packages/expreszo
+        # mkdocs.yml lives at the repo root now; mkdocs reads docs/ from
+        # there and writes the rendered site to ./site.
         run: mkdocs build
 
       - name: Prepare playground files
         run: |
           mkdir -p _site/dist
-          cp packages/expreszo/samples/language-service-sample/index.html _site/
-          cp packages/expreszo/samples/language-service-sample/app.js _site/
-          cp packages/expreszo/samples/language-service-sample/examples.js _site/
-          cp packages/expreszo/samples/language-service-sample/styles.css _site/
+          cp samples/language-service-sample/index.html _site/
+          cp samples/language-service-sample/app.js _site/
+          cp samples/language-service-sample/examples.js _site/
+          cp samples/language-service-sample/styles.css _site/
           cp packages/expreszo/dist/bundle.js _site/dist/
-          cp -r packages/expreszo/site _site/docs
+          cp -r site _site/docs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
