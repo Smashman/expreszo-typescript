@@ -33,6 +33,12 @@ jobs:
     - name: Lint (all workspaces)
       run: yarn workspaces run lint
 
+    - name: Build (all workspaces)
+      # Must run before type-check: datetime and mcp-server resolve
+      # `@pro-fa/expreszo` via its built dist/index.d.ts, which the alphabetical
+      # workspace order produces first.
+      run: yarn workspaces run build
+
     - name: Type-check (all workspaces)
       run: yarn workspaces run type-check
 

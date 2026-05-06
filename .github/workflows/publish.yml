@@ -36,14 +36,15 @@ jobs:
     - name: Lint (all workspaces)
       run: yarn workspaces run lint
 
+    - name: Build (all workspaces)
+      # Must run before type-check; see comment in ci.yml.
+      run: yarn workspaces run build
+
     - name: Type-check (all workspaces)
       run: yarn workspaces run type-check
 
     - name: Test (all workspaces)
       run: yarn workspaces run test
-
-    - name: Build (all workspaces)
-      run: yarn workspaces run build
 
     - name: Show package identity
       working-directory: packages/${{ matrix.package }}
