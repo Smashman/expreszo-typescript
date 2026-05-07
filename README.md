@@ -19,7 +19,7 @@ const parser = new Parser();
 parser.evaluate('price * (1 - discount)', { price: 100, discount: 0.2 }); // 80
 ```
 
-[Read full documentation](https://pro-fa.github.io/expreszo-typescript/)
+[Read full documentation](https://pro-fa.github.io/expreszo-typescript/docs/)
 
 ## Companion packages
 
