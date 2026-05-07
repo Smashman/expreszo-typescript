@@ -34,5 +34,8 @@
     "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0",
     "vitest": "^3.2.4"
+  },
+  "resolutions": {
+    "ip-address": "^10.1.1"
   }
 }
