@@ -4,11 +4,27 @@
  */
 
 export function equal(a: any, b: any): boolean {
-  return a === b;
+  if (a === b) return true;
+  // Two non-null objects with a meaningful `valueOf()` (i.e. one that
+  // returns something *other than* the object itself) are compared by
+  // their primitive form. This mirrors what the relational operators
+  // (`<`, `>`, `<=`, `>=`) already do via JS's `ToPrimitive`, and lets
+  // values like Luxon `DateTime` and JS `Date` compare by instant
+  // without the core ever knowing about either type.
+  // Plain objects and arrays return themselves from `valueOf()`, so
+  // they still fall through to reference-equality semantics.
+  if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
+    const av = a.valueOf();
+    const bv = b.valueOf();
+    if (av !== a && bv !== b) {
+      return av === bv;
+    }
+  }
+  return false;
 }
 
 export function notEqual(a: any, b: any): boolean {
-  return a !== b;
+  return !equal(a, b);
 }
 
 export function greaterThan(a: any, b: any): boolean | undefined {

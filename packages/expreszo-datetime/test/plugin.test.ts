@@ -132,6 +132,35 @@ describe('inspection', () => {
   });
 });
 
+// Core's `equal`/`notEqual` are valueOf-aware as of @pro-fa/expreszo 0.6.1,
+// so two Luxon DateTime instances at the same instant compare equal via the
+// existing `==` and `!=` operators. The plugin doesn't need to override
+// anything — it just needs to be the source of the DateTime values.
+describe('== and != on DateTime values via core operators', () => {
+  it('two DateTimes at the same instant are ==', () => {
+    expect(parser().evaluate("parseISO('2026-01-01') == parseISO('2026-01-01')")).toBe(true);
+    expect(parser().evaluate("parseISO('2026-01-01') != parseISO('2026-01-01')")).toBe(false);
+  });
+
+  it('two DateTimes at different instants are !=', () => {
+    expect(parser().evaluate("parseISO('2026-01-01') == parseISO('2026-01-02')")).toBe(false);
+    expect(parser().evaluate("parseISO('2026-01-01') != parseISO('2026-01-02')")).toBe(true);
+  });
+
+  it('a Luxon DateTime equals an equivalent JS Date', () => {
+    const ms = Date.UTC(2026, 0, 1);
+    const jsDate = new Date(ms);
+    expect(parser().evaluate("parseISO('2026-01-01T00:00:00Z') == d", { d: jsDate as unknown as never })).toBe(true);
+  });
+
+  it('relational operators continue to work as before', () => {
+    expect(parser().evaluate("parseISO('2026-01-01') <  parseISO('2026-02-01')")).toBe(true);
+    expect(parser().evaluate("parseISO('2026-02-01') >  parseISO('2026-01-01')")).toBe(true);
+    expect(parser().evaluate("parseISO('2026-01-01') <= parseISO('2026-01-01')")).toBe(true);
+    expect(parser().evaluate("parseISO('2026-01-01') >= parseISO('2026-01-01')")).toBe(true);
+  });
+});
+
 describe('end-to-end pipeline', () => {
   it('chains construction, arithmetic, and formatting', () => {
     expect(

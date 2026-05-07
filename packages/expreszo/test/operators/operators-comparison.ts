@@ -138,4 +138,73 @@ describe('Comparison Operators TypeScript Test', () => {
       expect(parser.evaluate('3 <= 3')).toBe(true);
     });
   });
+
+  // Equality is valueOf-aware: any two non-null objects whose `.valueOf()`
+  // returns a primitive distinct from themselves compare by that primitive.
+  // This makes `==` and `!=` line up with how `<`/`>`/`<=`/`>=` already
+  // behave (via ToPrimitive), and lets values like JS `Date` and Luxon
+  // `DateTime` work without core knowing about either type.
+  describe('== / != on objects with a meaningful valueOf', () => {
+    const ms = Date.UTC(2026, 0, 1);
+
+    it('two JS Date instances at the same instant are ==', () => {
+      const d1 = new Date(ms);
+      const d2 = new Date(ms);
+      expect(parser.evaluate('a == b', { a: d1 as never, b: d2 as never })).toBe(true);
+      expect(parser.evaluate('a != b', { a: d1 as never, b: d2 as never })).toBe(false);
+    });
+
+    it('two JS Date instances at different instants are !=', () => {
+      const d1 = new Date(ms);
+      const d2 = new Date(ms + 1);
+      expect(parser.evaluate('a == b', { a: d1 as never, b: d2 as never })).toBe(false);
+      expect(parser.evaluate('a != b', { a: d1 as never, b: d2 as never })).toBe(true);
+    });
+
+    it('two custom objects with the same numeric valueOf are ==', () => {
+      const a = { valueOf: () => 42 };
+      const b = { valueOf: () => 42 };
+      expect(parser.evaluate('a == b', { a: a as never, b: b as never })).toBe(true);
+    });
+
+    it('a JS Date and a custom valueOf object compare by their primitive', () => {
+      const a = new Date(ms);
+      const b = { valueOf: () => ms };
+      expect(parser.evaluate('a == b', { a: a as never, b: b as never })).toBe(true);
+    });
+
+    it('plain objects without an overridden valueOf still use reference equality', () => {
+      const a = { x: 1 };
+      const b = { x: 1 };
+      expect(parser.evaluate('a == b', { a: a as never, b: b as never })).toBe(false);
+      expect(parser.evaluate('a != b', { a: a as never, b: b as never })).toBe(true);
+      // Same reference is still ==
+      expect(parser.evaluate('a == a', { a: a as never })).toBe(true);
+    });
+
+    it('arrays still use reference equality', () => {
+      const a = [1, 2, 3];
+      const b = [1, 2, 3];
+      expect(parser.evaluate('a == b', { a: a as never, b: b as never })).toBe(false);
+    });
+
+    it('two invalid Dates (NaN-valued) are not ==', () => {
+      const a = new Date(NaN);
+      const b = new Date(NaN);
+      expect(parser.evaluate('a == b', { a: a as never, b: b as never })).toBe(false);
+      expect(parser.evaluate('a != b', { a: a as never, b: b as never })).toBe(true);
+    });
+
+    it('object compared to a primitive is not ==', () => {
+      const a = new Date(ms);
+      expect(parser.evaluate('a == ms', { a: a as never, ms })).toBe(false);
+      expect(parser.evaluate('a != ms', { a: a as never, ms })).toBe(true);
+    });
+
+    it('null still equals only null', () => {
+      const a = new Date(ms);
+      expect(parser.evaluate('a == n', { a: a as never, n: null })).toBe(false);
+      expect(parser.evaluate('n == n', { n: null })).toBe(true);
+    });
+  });
 });

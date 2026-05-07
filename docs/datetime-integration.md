@@ -54,6 +54,22 @@ Functions that **produce** a date return a Luxon `DateTime` so chains stay effic
 
 The full normaliser lives at [`packages/expreszo-datetime/src/normalize.ts`](https://github.com/Pro-Fa/expreszo-typescript/blob/main/packages/expreszo-datetime/src/normalize.ts) and is exported as `toDateTime` / `toDateTimeOrUndefined` for callers who want to do their own conversions outside an expression.
 
+## Operators on DateTime values
+
+As of `@pro-fa/expreszo` 0.6.1, the core comparison operators are `valueOf`-aware: any two non-null objects whose `.valueOf()` returns a primitive distinct from themselves compare by that primitive. So with `dateTimePlugin` registered (or just a JS `Date` in your `variables` map):
+
+```
+parseISO('2026-01-01') == parseISO('2026-01-01')   // true
+parseISO('2026-01-01') <  parseISO('2026-02-01')   // true
+parseISO('2026-01-01') >= parseISO('2026-01-01')   // true
+```
+
+No operator overrides, no separate plugin — the relational operators (`<`, `>`, `<=`, `>=`) always worked because JS's `ToPrimitive` already calls `valueOf`; `==` and `!=` now follow suit.
+
+Plain objects and arrays still use reference equality, so the change is targeted at value-bearing objects (`Date`, Luxon `DateTime`, boxed primitives) only.
+
+Arithmetic operators (`+`, `-`) are intentionally **not** DateTime-aware — `addDuration`, `subtractDuration`, and `diff` are explicit about units and avoid the "what does `date + 7` mean" footgun.
+
 ## Wiring the plugin into the language service
 
 `createLanguageService` accepts the same plugins via a `plugins` option, so completions, hover, and diagnostics see the datetime functions too:

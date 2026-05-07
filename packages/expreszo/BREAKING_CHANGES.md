@@ -2,6 +2,26 @@
 
 This document lists breaking changes in the library to help users migrate between versions.
 
+## 0.6.1 — `==` / `!=` are now valueOf-aware
+
+`equal` and `notEqual` (the `==` and `!=` operators) now compare two non-null objects by their `valueOf()` result whenever both operands return a primitive distinct from themselves. This mirrors what `<` / `>` / `<=` / `>=` already did via JavaScript's `ToPrimitive` algorithm, and lets values like Luxon `DateTime` and JS `Date` compare by instant without the core knowing about either type.
+
+**What changed:**
+
+- Two `Date` instances at the same millisecond are now `==`. They were `!=` before (reference equality on objects).
+- Two Luxon `DateTime` values at the same instant are now `==` (when the `@pro-fa/expreszo-datetime` plugin is registered).
+- Boxed primitives — `new Number(5)`, `new String('x')` — also start comparing by their primitive form.
+
+**What did not change:**
+
+- Plain objects (`{a:1} == {a:1}`) still return `false` — they have no overridden `valueOf()`, so the new branch falls through to reference equality.
+- Arrays (`[1,2] == [1,2]`) still return `false`, same reason.
+- All primitive comparisons (`3 == 3`, `'a' == 'a'`) keep their existing semantics.
+- `null` continues to equal only `null`; `undefined` continues to equal only `undefined`.
+- Object compared to a primitive is still `false` — no implicit cross-type coercion.
+
+This is technically a behaviour change for code that was relying on `Date == Date` returning `false`. Audit any expression that explicitly compared two date-like objects expecting reference inequality.
+
 ## 0.6.0 — companion packages and `parser.use(plugin)`
 
 ### `./mcp-server` subpath export removed

@@ -4,6 +4,14 @@ All notable changes to `@pro-fa/expreszo-datetime` are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.2.1
+
+### Improved
+
+`==` and `!=` now compare two `DateTime` values by instant. This isn't a change in this package — it's a side-effect of `@pro-fa/expreszo` 0.6.1 making the core operators `valueOf`-aware. With `dateTimePlugin` registered, **all six comparison operators** (`<`, `>`, `<=`, `>=`, `==`, `!=`) work as expected on DateTimes (and on JS `Date` values from your variables map). No additional wiring needed.
+
+The peer-dependency range now requires `@pro-fa/expreszo` ≥ 0.6.1.
+
 ## 0.2.0
 
 ### Added
