@@ -400,6 +400,24 @@ describe('Expression Advanced Features TypeScript Test', () => {
       expect(parser.evaluate('NaN ?? 0')).toBe(0);
     });
 
+    it('returns the value for non-empty strings (regression: was returning fallback)', () => {
+      expect(parser.evaluate('s ?? "fallback"', { s: 'hello' })).toBe('hello');
+    });
+
+    it('returns the fallback for empty strings', () => {
+      expect(parser.evaluate('s ?? "fallback"', { s: '' })).toBe('fallback');
+    });
+
+    it('returns the fallback for empty arrays and objects', () => {
+      expect(parser.evaluate('a ?? "fallback"', { a: [] })).toBe('fallback');
+      expect(parser.evaluate('o ?? "fallback"', { o: {} })).toBe('fallback');
+    });
+
+    it('passes through non-empty arrays and objects', () => {
+      expect(parser.evaluate('a ?? "fallback"', { a: [1, 2] })).toEqual([1, 2]);
+      expect(parser.evaluate('o ?? "fallback"', { o: { x: 1 } })).toEqual({ x: 1 });
+    });
+
     it('should be disabled by the coalesce option', () => {
       const parser = new Parser({ operators: { coalesce: false } });
       expect(() => parser.evaluate('1 ?? 2')).toThrow(/Unknown character/);

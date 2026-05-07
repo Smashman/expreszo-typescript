@@ -4,6 +4,7 @@
  */
 
 import { AccessError } from '../../types/errors.js';
+import { isValueArray, isValueObject } from '../../types/type-guards.js';
 import { DANGEROUS_PROPERTIES } from '../../validation/constants.js';
 
 export function concat(a: any, b: any): any[] | string | undefined {
@@ -68,7 +69,12 @@ export function arrayIndexOrProperty(parent: any, index: number | string | undef
 }
 
 export function coalesce(a: any, b: any): any {
-  return a === undefined || a === null || a === Infinity || isNaN(a) ? b : a;
+  if (a === undefined || a === null) return b;
+  if (a === '') return b;
+  if (typeof a === 'number' && (a === Infinity || a === -Infinity || Number.isNaN(a))) return b;
+  if (isValueArray(a) && a.length === 0) return b;
+  if (isValueObject(a) && Object.keys(a).length === 0) return b;
+  return a;
 }
 
 export function asOperator(a: any, b: string | undefined): any {

@@ -308,28 +308,39 @@ describe('Binary Utility Operators', () => {
       expect(coalesce(Infinity, 'fallback')).toBe('fallback');
     });
 
+    it('should return fallback when first value is -Infinity', () => {
+      expect(coalesce(-Infinity, 'fallback')).toBe('fallback');
+    });
+
     it('should return fallback when first value is NaN', () => {
       expect(coalesce(NaN, 'fallback')).toBe('fallback');
+    });
+
+    it('should return fallback when first value is empty string', () => {
+      expect(coalesce('', 'fallback')).toBe('fallback');
+    });
+
+    it('should return fallback when first value is empty array', () => {
+      expect(coalesce([], 'fallback')).toBe('fallback');
+    });
+
+    it('should return fallback when first value is empty object', () => {
+      expect(coalesce({}, 'fallback')).toBe('fallback');
     });
 
     it('should return 0 when first value is 0', () => {
       expect(coalesce(0, 'fallback')).toBe(0);
     });
 
-    it('should return empty string when first value is empty string', () => {
-      expect(coalesce('', 'fallback')).toBe('');
-    });
-
     it('should return false when first value is false', () => {
       expect(coalesce(false, 'fallback')).toBe(false);
     });
 
-    it('should return fallback for non-numeric strings (isNaN coerces to NaN)', () => {
-      expect(coalesce('hello', 'fallback')).toBe('fallback');
+    it('should return non-numeric strings unchanged', () => {
+      expect(coalesce('hello', 'fallback')).toBe('hello');
     });
 
     it('should return numeric string when it is valid', () => {
-      // isNaN('42') is false because '42' coerces to 42
       expect(coalesce('42', 'fallback')).toBe('42');
     });
 
@@ -338,17 +349,12 @@ describe('Binary Utility Operators', () => {
       expect(coalesce(-1, 0)).toBe(-1);
     });
 
-    it('should return fallback for arrays (isNaN coerces array to NaN)', () => {
-      expect(coalesce([1, 2], 'fallback')).toBe('fallback');
+    it('should return non-empty arrays unchanged', () => {
+      expect(coalesce([1, 2], 'fallback')).toEqual([1, 2]);
     });
 
-    it('should return fallback for objects (isNaN coerces object to NaN)', () => {
-      expect(coalesce({ a: 1 }, 'fallback')).toBe('fallback');
-    });
-
-    it('should return -Infinity (not caught by === Infinity or isNaN)', () => {
-      // -Infinity !== Infinity, and isNaN(-Infinity) is false
-      expect(coalesce(-Infinity, 'fallback')).toBe(-Infinity);
+    it('should return non-empty objects unchanged', () => {
+      expect(coalesce({ a: 1 }, 'fallback')).toEqual({ a: 1 });
     });
   });
 

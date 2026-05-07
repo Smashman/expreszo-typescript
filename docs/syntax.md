@@ -560,11 +560,15 @@ x == undefined      → true (if x is not defined)
 
 ## Coalesce Operator
 
-The `??` operator returns the right operand when the left operand is null, undefined, Infinity, or NaN:
+The `??` operator returns the right operand when the left operand is "missing" — that is,
+`null`, `undefined`, an empty string `""`, an empty array `[]`, an empty object `{}`,
+`Infinity` (positive or negative), or `NaN`:
 
 ```
 x ?? 0                    → 0 (if x is undefined or null)
 y ?? "default"            → y (if y has a value)
+"" ?? "default"           → "default"
+[] ?? "default"           → "default"
 10 / 0 ?? -1              → -1 (division by zero gives Infinity)
 sqrt(-1) ?? 0             → 0 (sqrt of negative gives NaN)
 ```
