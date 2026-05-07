@@ -21,10 +21,13 @@
     "dist/"
   ],
   "scripts": {
-    "build": "cross-env BUILD_TARGET=esm vite build",
-    "test": "npm run build && vitest run",
+    "build:esm": "cross-env BUILD_TARGET=esm vite build",
+    "build:umd": "cross-env BUILD_TARGET=umd vite build",
+    "build:umd-min": "cross-env BUILD_TARGET=umd-min vite build",
+    "build": "npm run build:esm && npm run build:umd && npm run build:umd-min",
+    "test": "npm run build:esm && vitest run",
     "test:watch": "vitest",
-    "coverage": "npm run build && vitest run --coverage",
+    "coverage": "npm run build:esm && vitest run --coverage",
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "type-check": "tsc --noEmit",
     "clean": "rimraf dist"
@@ -48,6 +51,7 @@
     "@types/node": "^24.5.2",
     "cross-env": "^7.0.3",
     "rimraf": "^5.0.10",
+    "terser": "^5.44.1",
     "typescript": "^5.9.2",
     "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0",

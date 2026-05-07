@@ -36,6 +36,12 @@ jobs:
         working-directory: packages/expreszo
         run: yarn build:umd
 
+      - name: Build UMD bundle (datetime)
+        # Self-contained UMD with Luxon inlined; the playground exposes it
+        # as window.exprEvalDateTime when the user flips the toggle on.
+        working-directory: packages/expreszo-datetime
+        run: yarn build:umd
+
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -57,6 +63,7 @@ jobs:
           cp samples/language-service-sample/examples.js _site/
           cp samples/language-service-sample/styles.css _site/
           cp packages/expreszo/dist/bundle.js _site/dist/
+          cp packages/expreszo-datetime/dist/bundle.js _site/dist/expreszo-datetime.bundle.js
           cp -r site _site/docs
 
       - name: Setup Pages

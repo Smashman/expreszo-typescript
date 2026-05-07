@@ -54,6 +54,19 @@ Functions that **produce** a date return a Luxon `DateTime` so chains stay effic
 
 The full normaliser lives at [`packages/expreszo-datetime/src/normalize.ts`](https://github.com/Pro-Fa/expreszo-typescript/blob/main/packages/expreszo-datetime/src/normalize.ts) and is exported as `toDateTime` / `toDateTimeOrUndefined` for callers who want to do their own conversions outside an expression.
 
+## Wiring the plugin into the language service
+
+`createLanguageService` accepts the same plugins via a `plugins` option, so completions, hover, and diagnostics see the datetime functions too:
+
+```ts
+import { createLanguageService } from '@pro-fa/expreszo/language-service';
+import { dateTimePlugin }         from '@pro-fa/expreszo-datetime';
+
+const ls = createLanguageService({ plugins: [dateTimePlugin] });
+```
+
+Without this, the language service won't know about `now`, `parseISO`, etc. and will flag them as unknown — even when `parser.use(dateTimePlugin)` is registered on the parser used for evaluation.
+
 ## Spread-into-`defineParser` form
 
 `parser.use(plugin)` is the recommended path, but the package also exports a `ParserPreset` for callers who prefer the spread-composition style consistent with the built-in `withMath`, `withString`, etc.:

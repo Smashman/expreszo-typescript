@@ -1121,3 +1121,85 @@ describe('Language Service', () => {
     });
   });
 });
+
+describe('Language Service — plugins option', () => {
+  // Minimal plugin that contributes a single function with docs. We use this
+  // shape rather than wiring in @pro-fa/expreszo-datetime to keep the core
+  // test suite Luxon-free.
+  const probePlugin = {
+    name: 'probe',
+    version: '0.0.1',
+    functions: [
+      {
+        name: 'greet',
+        impl: (name: unknown) => `hello ${String(name)}`,
+        category: 'utility' as const,
+        pure: true,
+        safe: true,
+        async: false,
+        docs: {
+          description: 'Greets the given name.',
+          params: [{ name: 'name', description: 'Person to greet', type: 'string' as const }]
+        }
+      }
+    ]
+  };
+
+  function makeDoc(text: string) {
+    return TextDocument.create('expreszo://plugins-test', 'expreszo', 1, text);
+  }
+
+  it('includes plugin functions in completions', () => {
+    const ls = createLanguageService({ plugins: [probePlugin] });
+    const doc = makeDoc('gr');
+    const completions = ls.getCompletions({
+      textDocument: doc,
+      position: { line: 0, character: 2 }
+    });
+    const greet = completions.find((c) => c.label === 'greet');
+    expect(greet).toBeDefined();
+    expect(greet?.kind).toBe(CompletionItemKind.Function);
+  });
+
+  it('surfaces plugin docs in hover', () => {
+    const ls = createLanguageService({ plugins: [probePlugin] });
+    const doc = makeDoc("greet('world')");
+    const hover = ls.getHover({
+      textDocument: doc,
+      position: { line: 0, character: 1 }
+    });
+    expect(hover).not.toBeNull();
+    const text = getContentsValue(hover?.contents);
+    expect(text).toContain('Greets the given name.');
+    expect(text).toContain('greet(name)');
+  });
+
+  it('does not flag a plugin function as unknown', () => {
+    const ls = createLanguageService({ plugins: [probePlugin] });
+    const doc = makeDoc("greet('world')");
+    const diags = ls.getDiagnostics({ textDocument: doc });
+    const unknown = diags.filter(
+      (d) => d.severity === DiagnosticSeverity.Error && /unknown/i.test(d.message)
+    );
+    expect(unknown).toEqual([]);
+  });
+
+  it('still flags genuinely unknown identifiers when plugins are present', () => {
+    const ls = createLanguageService({ plugins: [probePlugin] });
+    const doc = makeDoc('mystery(1, 2)');
+    // Unknown-ident diagnostics only fire when the caller supplies a
+    // variables map — otherwise the LS assumes runtime resolution.
+    const diags = ls.getDiagnostics({ textDocument: doc, variables: {} });
+    const unknown = diags.filter((d) => d.code === 'unknown-ident');
+    expect(unknown.length).toBeGreaterThan(0);
+    expect(unknown[0].message).toContain('mystery');
+  });
+
+  it('does not flag a plugin function as unknown when variables is provided', () => {
+    const ls = createLanguageService({ plugins: [probePlugin] });
+    const doc = makeDoc("greet('world')");
+    const diags = ls.getDiagnostics({ textDocument: doc, variables: {} });
+    const unknown = diags.filter((d) => d.code === 'unknown-ident');
+    expect(unknown).toEqual([]);
+  });
+});

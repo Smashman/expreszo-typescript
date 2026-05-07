@@ -4,10 +4,11 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 
-// Repo root — `samples/` and `docs/` live here, while the built UMD bundle
-// lives inside the expreszo package at `packages/expreszo/dist/`.
+// Repo root — `samples/` and `docs/` live here, while built UMD bundles
+// live inside their respective packages.
 const root = path.resolve(__dirname, '../../');
 const expreszoDist = path.resolve(root, 'packages/expreszo/dist');
+const expreszoDatetimeDist = path.resolve(root, 'packages/expreszo-datetime/dist');
 const port = process.env.PORT ? Number(process.env.PORT) : 8080;
 
 const mime = {
@@ -51,11 +52,19 @@ const server = http.createServer((req, res) => {
 
     const safeRelativePath = urlPath.replace(/^([/\\])+/, '');
 
-    // The bundle the sample loads (`/dist/bundle.js`) lives inside the
-    // expreszo package, not at repo root. Resolve it there explicitly so
+    // Bundles the playground references (`/dist/...`) live inside their
+    // respective packages, not at repo root. Resolve them explicitly so
     // the rest of the static-file flow stays simple.
+    //   /dist/expreszo-datetime.bundle.js -> packages/expreszo-datetime/dist/bundle.js
+    //   /dist/...                         -> packages/expreszo/dist/...
     let filePath;
-    if (safeRelativePath.startsWith('dist/')) {
+    if (safeRelativePath === 'dist/expreszo-datetime.bundle.js') {
+        filePath = path.resolve(expreszoDatetimeDist, 'bundle.js');
+        const distWithSep = expreszoDatetimeDist.endsWith(path.sep) ? expreszoDatetimeDist : expreszoDatetimeDist + path.sep;
+        if (!filePath.startsWith(distWithSep)) {
+            return send(res, 403, 'Forbidden');
+        }
+    } else if (safeRelativePath.startsWith('dist/')) {
         filePath = path.resolve(expreszoDist, safeRelativePath.slice('dist/'.length));
         const distWithSep = expreszoDist.endsWith(path.sep) ? expreszoDist : expreszoDist + path.sep;
         if (!filePath.startsWith(distWithSep)) {

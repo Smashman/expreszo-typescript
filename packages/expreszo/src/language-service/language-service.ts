@@ -49,6 +49,7 @@ import { CompletionItemKind, MarkupKind, InsertTextFormat } from 'vscode-languag
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { BUILTIN_KEYWORD_DOCS, DEFAULT_CONSTANT_DOCS } from './language-service.documentation';
 import { FunctionDetails } from './language-service.models';
+import type { FunctionDocs } from '../registry/function-descriptor.js';
 import {
   valueTypeName,
   extractPathPrefix,
@@ -86,6 +87,23 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
   const parser = new Parser({
     operators: options?.operators
   });
+
+  // Register caller-supplied plugins (e.g. dateTimePlugin from
+  // @pro-fa/expreszo-datetime) on the internal parser so completions,
+  // hover, diagnostics, and signature help all see the merged set.
+  // Build a name -> docs map at the same time so FunctionDetails can
+  // surface plugin descriptor docs in hover/completion details.
+  const pluginDocs = new Map<string, FunctionDocs>();
+  if (options?.plugins) {
+    for (const plugin of options.plugins) {
+      parser.use(plugin);
+      if (plugin.functions) {
+        for (const fn of plugin.functions) {
+          if (fn.docs) pluginDocs.set(fn.name, fn.docs);
+        }
+      }
+    }
+  }
 
   const parseCache = createParseCache(parser);
 
@@ -139,7 +157,7 @@ export function createLanguageService(options: LanguageServiceOptions | undefine
     // Merge, prefer functions map descriptions where available
     const rawFunctions = Array.from(new Set([...definedFunctions, ...unary]));
 
-    cachedFunctions = rawFunctions.map(name => new FunctionDetails(parser, name));
+    cachedFunctions = rawFunctions.map(name => new FunctionDetails(parser, name, pluginDocs));
     cachedFunctionNames = new Set(rawFunctions);
     return cachedFunctions;
   }

@@ -8,8 +8,15 @@ import { MarkupKind } from 'vscode-languageserver-types';
 export class FunctionDetails {
   private readonly docBlock: FunctionDocs | undefined;
 
-  constructor(private readonly parser: Parser, public readonly name: string) {
-    this.docBlock = BUILTIN_FUNCTIONS_BY_NAME.get(this.name)?.docs;
+  constructor(
+    private readonly parser: Parser,
+    public readonly name: string,
+    pluginDocs?: ReadonlyMap<string, FunctionDocs>
+  ) {
+    // Built-ins win when a plugin shadows a name, but plugin docs are
+    // consulted as a fallback so `now`, `parseISO`, etc. surface the
+    // descriptor's `docs` field in hover and signature help.
+    this.docBlock = BUILTIN_FUNCTIONS_BY_NAME.get(this.name)?.docs ?? pluginDocs?.get(this.name);
   }
 
   public params(): readonly FunctionParamDoc[] {

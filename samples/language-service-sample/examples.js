@@ -159,5 +159,34 @@ const exampleCases = [
         context: {
             items: [1, 2, 3, 4, 5]
         }
+    },
+    {
+        id: 'datetime-format',
+        title: 'Format a future date',
+        description: 'Add 7 days to today and render as yyyy-MM-dd. Requires the Date/Time plugin.',
+        expression: "format(addDuration(today(), 7, 'days'), 'yyyy-MM-dd')",
+        context: {},
+        requiresDateTime: true
+    },
+    {
+        id: 'datetime-relative',
+        title: 'Days until a deadline',
+        description: 'Compute how many whole days separate today from a deadline. Requires the Date/Time plugin.',
+        expression: 'daysUntil(deadline)',
+        context: {
+            deadline: '2026-12-25'
+        },
+        requiresDateTime: true
+    },
+    {
+        id: 'datetime-business',
+        title: 'Business days in a range',
+        description: 'Count Mon–Fri days between two ISO dates. Requires the Date/Time plugin.',
+        expression: "businessDaysBetween(rangeStart, rangeEnd)",
+        context: {
+            rangeStart: '2026-05-01',
+            rangeEnd: '2026-06-01'
+        },
+        requiresDateTime: true
     }
 ];

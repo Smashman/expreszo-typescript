@@ -131,6 +131,16 @@ function renderExamplesSidebar() {
 
 // Load example into editors
 function loadExample(example) {
+    // Auto-enable the Date/Time plugin when an example needs it. Dispatching
+    // 'change' lets the existing toggle handler do all the wiring (rebuild
+    // the language service, persist, re-run highlight/diag/eval).
+    if (example.requiresDateTime) {
+        const dt = document.getElementById('dateTimeToggle');
+        if (dt && !dt.checked) {
+            dt.checked = true;
+            dt.dispatchEvent(new Event('change'));
+        }
+    }
     if (typeof expressionEditor !== 'undefined' && expressionEditor) {
         expressionEditor.getModel().setValue(example.expression);
     }
@@ -316,12 +326,25 @@ require(['vs/editor/editor.main'], function () {
     const savedExpression = localStorage.getItem('expreszo-expression') || defaultExpression;
     const savedContext = localStorage.getItem('expreszo-context') || defaultContext;
     const savedLegacy = localStorage.getItem('expreszo-legacy') === 'true';
+    const savedDateTime = localStorage.getItem('expreszo-datetime-enabled') === 'true';
 
     // Legacy-mode toggle — swaps parser operator implementations for `+`, `/`,
     // `|`, comparisons, `indexOf`, `join`.
     const legacyToggle = document.getElementById('legacyToggle');
     legacyToggle.checked = savedLegacy;
     let legacyMode = savedLegacy;
+
+    // Date/Time plugin toggle — registers @pro-fa/expreszo-datetime's
+    // `dateTimePlugin` on both the evaluator parser and the language service
+    // when on. The companion UMD is loaded via a separate <script> tag in
+    // index.html; if it failed to fetch we surface a small notice.
+    const dateTimeToggle = document.getElementById('dateTimeToggle');
+    dateTimeToggle.checked = savedDateTime;
+    let dateTimeEnabled = savedDateTime;
+    const dateTimeBundleMissing = window.__expreszoDateTimeBundleMissing === true;
+    function getDateTimePlugin() {
+        return (window.exprEvalDateTime && window.exprEvalDateTime.dateTimePlugin) || null;
+    }
 
     // Create context editor (JSON)
     const contextModel = monaco.editor.createModel(savedContext, 'json');
@@ -365,7 +388,15 @@ require(['vs/editor/editor.main'], function () {
         return;
     }
 
-    const ls = createLanguageService();
+    // Build a fresh language service against the current toggle state. The
+    // Monaco provider closures further down read `ls.getXxx(...)` at provide
+    // time, so reassigning `ls` is enough to flip behaviour live.
+    function buildLanguageService() {
+        const plugin = getDateTimePlugin();
+        const plugins = (dateTimeEnabled && plugin) ? [plugin] : [];
+        return createLanguageService({ plugins });
+    }
+    let ls = buildLanguageService();
 
     function toMonacoRange(range) {
         return new monaco.Range(
@@ -965,6 +996,10 @@ require(['vs/editor/editor.main'], function () {
 
         try {
             const parser = new Parser({ legacy: legacyMode });
+            if (dateTimeEnabled) {
+                const plugin = getDateTimePlugin();
+                if (plugin) parser.use(plugin);
+            }
             const evaluationResult = parser.evaluate(expression, contextVars || {});
             showResult(evaluationResult);
         } catch (error) {
@@ -975,6 +1010,29 @@ require(['vs/editor/editor.main'], function () {
     legacyToggle.addEventListener('change', () => {
         legacyMode = legacyToggle.checked;
         localStorage.setItem('expreszo-legacy', String(legacyMode));
+        evaluate();
+    });
+
+    dateTimeToggle.addEventListener('change', () => {
+        dateTimeEnabled = dateTimeToggle.checked;
+        localStorage.setItem('expreszo-datetime-enabled', String(dateTimeEnabled));
+
+        if (dateTimeEnabled && !getDateTimePlugin()) {
+            const reason = dateTimeBundleMissing
+                ? 'expreszo-datetime.bundle.js failed to load. Run `yarn workspace @pro-fa/expreszo-datetime build:umd` and reload.'
+                : 'expreszo-datetime.bundle.js is loaded but does not expose `dateTimePlugin`.';
+            showError({ message: 'Date/Time plugin unavailable: ' + reason }, null);
+            // Leave the toggle in its checked state but the LS factory will
+            // fall back to no-plugins, so completions won't lie.
+        }
+
+        // Rebuild the language service so completions / hover / diagnostics
+        // pick up (or drop) the plugin's functions immediately.
+        ls = buildLanguageService();
+
+        // Re-run the editor pipelines that depend on the LS.
+        if (typeof applyHighlighting === 'function') applyHighlighting();
+        if (typeof applyDiagnostics === 'function') applyDiagnostics();
         evaluate();
     });
 

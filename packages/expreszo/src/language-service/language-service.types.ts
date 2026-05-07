@@ -18,6 +18,9 @@ import type {
 } from 'vscode-languageserver-types';
 import type { FormatOptions } from './formatter/pretty-printer';
 import type { TextDocument } from 'vscode-languageserver-textdocument';
+import type { Plugin } from '../api/plugin.js';
+
+export type { Plugin } from '../api/plugin.js';
 
 /**
  * Public API for the language service
@@ -169,6 +172,11 @@ export interface LanguageServiceOptions {
     // A map of operator names to booleans indicating whether they are
     // allowed in the expression.
     operators?: Record<string, boolean>;
+    // Plugins to register on the internal Parser (and consult for docs).
+    // The datetime companion package is the canonical example: pass
+    // `dateTimePlugin` here and completions / hover / diagnostics start
+    // recognising `now`, `parseISO`, `addDuration`, `format`, …
+    plugins?: readonly Plugin[];
 }
 
 export interface GetCompletionsParams {

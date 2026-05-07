@@ -17,7 +17,7 @@
     "lint": "yarn workspaces run lint",
     "type-check": "yarn workspaces run type-check",
     "clean": "yarn workspaces run clean",
-    "playground": "yarn workspace @pro-fa/expreszo build:umd && node samples/language-service-sample/serve-sample.cjs",
+    "playground": "yarn workspace @pro-fa/expreszo build:umd && yarn workspace @pro-fa/expreszo-datetime build:umd && node samples/language-service-sample/serve-sample.cjs",
     "docs:build": "mkdocs build",
     "docs:serve": "mkdocs serve"
   },
