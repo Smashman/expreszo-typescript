@@ -132,6 +132,28 @@ describe('Type Checking Functions TypeScript Test', function () {
       assert.strictEqual(parser.evaluate('isUndefined({})'), false);
       assert.strictEqual(parser.evaluate('isUndefined(null)'), false);
     });
+    it('should return true for variables that are not bound at all', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('isUndefined(some_nonexistent_variable)'), true);
+    });
+    it('should return true for member access on a missing root variable', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('isUndefined(missing.nested.path)'), true);
+    });
+    it('should be usable in a ternary as a guard against missing variables', function () {
+      const parser = new Parser();
+      assert.strictEqual(
+        parser.evaluate('isUndefined(missing) ? "fallback" : missing'),
+        'fallback'
+      );
+    });
+    it('should still return false for bound variables when used in a ternary guard', function () {
+      const parser = new Parser();
+      assert.strictEqual(
+        parser.evaluate('isUndefined(x) ? "fallback" : x', { x: 'hello' }),
+        'hello'
+      );
+    });
   });
 
   describe('isFunction(value)', function () {

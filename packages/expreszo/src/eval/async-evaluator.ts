@@ -283,6 +283,24 @@ async function evalCall(
       : evalNode(node.args[2], expr, values, resolver);
   }
 
+  // Lazy isUndefined(x): an unbound `x` is treated as undefined, not an error,
+  // so the function can be used as a guard (`isUndefined(x) ? fallback : x`).
+  if (
+    !expr.legacy &&
+    node.callee.type === 'Ident' &&
+    node.callee.name === 'isUndefined' &&
+    node.args.length === 1
+  ) {
+    let argValue: Value;
+    try {
+      argValue = await evalNode(node.args[0], expr, values, resolver);
+    } catch (err) {
+      if (!(err instanceof VariableError)) throw err;
+      argValue = undefined;
+    }
+    return argValue === undefined;
+  }
+
   const callee = await evalNode(node.callee, expr, values, resolver);
   const args = await Promise.all(
     node.args.map((arg) => evalNode(arg, expr, values, resolver))
