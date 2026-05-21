@@ -91,6 +91,7 @@ export default defineConfig(() => {
             // advertised in `package.json#exports`.
             entry: {
               index: resolve(__dirname, 'index.ts'),
+              ast: resolve(__dirname, 'src/ast/index.ts'),
               core: resolve(__dirname, 'src/entries/core.ts'),
               math: resolve(__dirname, 'src/entries/math.ts'),
               string: resolve(__dirname, 'src/entries/string.ts'),

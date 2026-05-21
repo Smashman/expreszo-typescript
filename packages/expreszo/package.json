@@ -1,6 +1,6 @@
 {
   "name": "@pro-fa/expreszo",
-  "version": "0.6.3",
+  "version": "0.6.4",
   "description": "Mathematical expression evaluator",
   "keywords": [
     "expression",
@@ -33,6 +33,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/bundle.js"
+    },
+    "./ast": {
+      "types": "./dist/ast.d.ts",
+      "import": "./dist/ast.mjs"
     },
     "./core": {
       "types": "./dist/core.d.ts",
