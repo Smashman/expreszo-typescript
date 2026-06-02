@@ -15,6 +15,11 @@ describe('String Functions TypeScript Test', function () {
       assert.strictEqual(parser.evaluate('length(undefined)'), undefined);
     });
 
+    it('should return 0 if argument is null', function () {
+      const parser = new Parser();
+      assert.strictEqual(parser.evaluate('length(null)'), 0);
+    });
+
     // Note: length(123) returns 3 (number of digits) because there's also a unary operator
     // that handles numbers, so we don't test the error case for non-string argument
   });
