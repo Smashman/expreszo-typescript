@@ -394,6 +394,17 @@ export const BUILTIN_FUNCTION_DOCS: Readonly<Record<string, FunctionDocs>> = {
       { name: 'size', description: 'Positive integer chunk size.', type: 'number' }
     ]
   },
+  sort: {
+    description:
+      'Return a sorted copy of an array (the original is not mutated). With no comparator, ' +
+      'values are sorted in natural ascending order. Optionally pass a comparator f(a, b) ' +
+      'that returns a negative number, zero, or a positive number to order a before, equal ' +
+      'to, or after b.',
+    params: [
+      { name: 'a', description: 'Input array.', type: 'array' },
+      { name: 'f', description: 'Optional comparator (a, b) => number.', optional: true, type: 'function' }
+    ]
+  },
   union: {
     description: 'Concatenate arrays and remove duplicates, preserving first-seen order. Element equality follows Set semantics (strict for primitives, reference for objects).',
     params: [
