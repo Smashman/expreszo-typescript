@@ -1,6 +1,6 @@
 {
   "name": "@pro-fa/expreszo",
-  "version": "0.6.5",
+  "version": "0.6.6",
   "description": "Mathematical expression evaluator",
   "keywords": [
     "expression",

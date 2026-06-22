@@ -109,6 +109,13 @@ export const BUILTIN_FUNCTION_DOCS: Readonly<Record<string, FunctionDocs>> = {
       { name: 'x', description: 'Value to stringify.', type: 'any' }
     ]
   },
+  ipInRange: {
+    description: 'Return true if the IPv4 address falls within the given CIDR block (e.g. "10.0.0.0/8"). IPv4 only.',
+    params: [
+      { name: 'ip', description: 'IPv4 address in dotted-quad form.', type: 'string' },
+      { name: 'cidr', description: 'CIDR block, e.g. "192.168.0.0/16".', type: 'string' }
+    ]
+  },
   sum: {
     description: 'Sum of all elements in an array.',
     params: [
@@ -267,6 +274,31 @@ export const BUILTIN_FUNCTION_DOCS: Readonly<Record<string, FunctionDocs>> = {
     description: 'Return the first non-null and non-empty string value from the arguments.',
     params: [
       { name: 'values', description: 'Values to check.', isVariadic: true, type: 'any' }
+    ]
+  },
+  regexMatches: {
+    description: 'Return true if the string matches the regular-expression pattern.',
+    params: [
+      { name: 'str', description: 'String to test.', type: 'string' },
+      { name: 'pattern', description: 'Regular-expression pattern source.', type: 'string' },
+      { name: 'flags', description: 'Optional regex flags, e.g. "i" or "m".', optional: true, type: 'string' }
+    ]
+  },
+  regexExtract: {
+    description: 'Extract the first match. Returns the array of capture groups when the pattern has groups, otherwise the full matched substring; undefined if there is no match.',
+    params: [
+      { name: 'str', description: 'String to search.', type: 'string' },
+      { name: 'pattern', description: 'Regular-expression pattern source.', type: 'string' },
+      { name: 'flags', description: 'Optional regex flags, e.g. "i" or "m".', optional: true, type: 'string' }
+    ]
+  },
+  regexReplace: {
+    description: 'Replace matches of the pattern with the replacement string. Defaults to a global replace; pass flags to override.',
+    params: [
+      { name: 'str', description: 'String to operate on.', type: 'string' },
+      { name: 'pattern', description: 'Regular-expression pattern source.', type: 'string' },
+      { name: 'replacement', description: 'Replacement string (supports $1, $& etc.).', type: 'string' },
+      { name: 'flags', description: 'Optional regex flags; defaults to "g".', optional: true, type: 'string' }
     ]
   },
   merge: {

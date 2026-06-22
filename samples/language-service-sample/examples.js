@@ -161,6 +161,17 @@ const exampleCases = [
         }
     },
     {
+        id: 'regex-network',
+        title: 'Regex & IP Range Functions',
+        description: 'Match, extract, and replace with regular expressions, plus an IPv4 CIDR range check. Note: write backslash classes as "\\\\d" in the source — character classes like "[0-9]" need no escaping.',
+        expression: '{\n  validEmail: regexMatches(email, "^[^@]+@[^@]+[.][a-z]+$"),\n  domain: regexExtract(email, "@(.+)$"),\n  maskedPhone: regexReplace(phone, "[0-9]", "*"),\n  isInternalIp: ipInRange(clientIp, "10.0.0.0/8")\n}',
+        context: {
+            email: 'alice@example.com',
+            phone: '555-123-4567',
+            clientIp: '10.42.1.7'
+        }
+    },
+    {
         id: 'datetime-format',
         title: 'Format a future date',
         description: 'Add 7 days to today and render as yyyy-MM-dd. Requires the Date/Time plugin.',
