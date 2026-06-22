@@ -165,6 +165,7 @@ Besides the "operator" functions, there are several pre-defined functions. You c
 | if(c, a, b)   | Function form of c ? a : b. Uses lazy evaluation: only the matching branch is evaluated. |
 | coalesce(a, b, ...)   | Returns the first non-null and non-empty string value from the arguments. Numbers and booleans (including 0 and false) are considered valid values. |
 | json(value)   | Converts a value to a JSON string representation. |
+| ipInRange(ip, cidr) | Returns `true` if the IPv4 address `ip` falls within the CIDR block `cidr` (e.g. `"10.0.0.0/8"`), `false` otherwise. IPv4 only. |
 
 ### Type Checking Functions
 
@@ -220,6 +221,16 @@ The parser includes comprehensive string manipulation capabilities.
 | replace(str, old, new)      | Replaces all occurrences of `old` with `new` in `str`. |
 | replaceFirst(str, old, new) | Replaces only the first occurrence of `old` with `new` in `str`. |
 
+### Regular Expressions
+
+| Function                                    | Description |
+|:------------------------------------------- |:----------- |
+| regexMatches(str, pattern, flags?)          | Returns `true` if `str` matches the regular expression `pattern`, `false` otherwise. Optional `flags` (e.g. `"i"`) are passed to the regex engine. |
+| regexExtract(str, pattern, flags?)          | Returns the first match of `pattern` in `str`. When `pattern` has capture groups, returns an array of the captured groups; otherwise returns the full matched substring. Returns `undefined` when there is no match. |
+| regexReplace(str, pattern, replacement, flags?) | Replaces matches of `pattern` in `str` with `replacement` (which may reference capture groups via `$1`, `$&`, …). Defaults to a global replace; pass `flags` to override (include `g` to keep replacing all matches). |
+
+> **Note:** Backslashes in a pattern must be escaped in the expression source because the string lexer rejects unknown escape sequences — write `"\\d+"` to match digits. Character classes such as `"[0-9]+"` need no escaping. A pattern supplied by an untrusted expression can trigger catastrophic backtracking (ReDoS); validate or constrain patterns when evaluating untrusted input.
+
 ### Type Conversion
 
 | Function         | Description |
@@ -272,6 +283,13 @@ split("a,b,c", ",")                       → ["a", "b", "c"]
 // String replacement
 replace("hello hello", "hello", "hi")    → "hi hi"
 replaceFirst("hello hello", "hello", "hi") → "hi hello"
+
+// Regular expressions
+regexMatches("abc123", "[0-9]+")         → true
+regexMatches("ABC", "abc", "i")          → true
+regexExtract("abc123def", "[0-9]+")      → "123"
+regexExtract("user-42", "user-([0-9]+)") → ["42"]
+regexReplace("a-b-c", "-", "_")          → "a_b_c"
 
 // Natural sorting
 naturalSort(["file10", "file2", "file1"]) → ["file1", "file2", "file10"]

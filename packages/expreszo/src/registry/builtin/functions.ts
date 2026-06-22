@@ -27,7 +27,8 @@ import {
   pick, omit,
   isArray, isObject, isNumber, isString, isBoolean, isNull, isUndefined, isFunctionValue,
   mean, median, mostFrequent, variance, stddev, percentile,
-  range, chunk, union, intersect, groupBy, countBy
+  range, chunk, union, intersect, groupBy, countBy,
+  regexMatches, regexExtract, regexReplace, ipInRange
 } from '../../functions/index.js';
 import { pow } from '../../operators/binary/index.js';
 
@@ -100,6 +101,9 @@ const RAW_BUILTIN_FUNCTIONS: readonly Omit<FunctionDescriptor, 'docs'>[] = [
   { name: 'base64Encode', category: 'string', pure: true, safe: true, async: false, impl: base64Encode },
   { name: 'base64Decode', category: 'string', pure: true, safe: true, async: false, impl: base64Decode },
   { name: 'coalesce',     category: 'string', pure: true, safe: true, async: false, impl: coalesceString },
+  { name: 'regexMatches', category: 'string', pure: true, safe: true, async: false, impl: regexMatches },
+  { name: 'regexExtract', category: 'string', pure: true, safe: true, async: false, impl: regexExtract },
+  { name: 'regexReplace', category: 'string', pure: true, safe: true, async: false, impl: regexReplace },
 
   // Array (continued)
   { name: 'sort',      category: 'array', pure: true, safe: true, async: false, impl: sort },
@@ -114,8 +118,9 @@ const RAW_BUILTIN_FUNCTIONS: readonly Omit<FunctionDescriptor, 'docs'>[] = [
   { name: 'omit',      category: 'object', pure: true, safe: true, async: false, impl: omit },
 
   // Utility
-  { name: 'if',   category: 'utility', pure: true, safe: true, async: false, impl: condition },
-  { name: 'json', category: 'utility', pure: true, safe: true, async: false, impl: json },
+  { name: 'if',        category: 'utility', pure: true, safe: true, async: false, impl: condition },
+  { name: 'json',      category: 'utility', pure: true, safe: true, async: false, impl: json },
+  { name: 'ipInRange', category: 'utility', pure: true, safe: true, async: false, impl: ipInRange },
 
   // Type-check
   { name: 'isArray',     category: 'type-check', pure: true, safe: true, async: false, impl: isArray },

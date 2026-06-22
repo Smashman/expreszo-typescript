@@ -77,6 +77,15 @@ This is a quick reference card. For detailed documentation, see [Expression Synt
 | `endsWith(s, sub)` | `endsWith("hello", "lo")` | true |
 | `replace(s, old, new)` | `replace("aa", "a", "b")` | "bb" |
 | `split(s, delim)` | `split("a,b", ",")` | ["a", "b"] |
+| `regexMatches(s, pat, flags?)` | `regexMatches("abc123", "[0-9]+")` | true |
+| `regexExtract(s, pat, flags?)` | `regexExtract("user-42", "user-([0-9]+)")` | ["42"] |
+| `regexReplace(s, pat, repl, flags?)` | `regexReplace("a-b-c", "-", "_")` | "a_b_c" |
+
+## Network Functions
+
+| Function | Example | Result |
+|:---------|:--------|:-------|
+| `ipInRange(ip, cidr)` | `ipInRange("10.1.2.3", "10.0.0.0/8")` | true |
 
 ## Array Functions
 
